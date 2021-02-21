@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>40kRoller</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Jura">
+    <style media="screen">
+        body {
+            color: #eeeeee;
+            background-color: #000000;
+        }
+        * {
+            font-family: Jura;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+        input {
+            text-align: center;
+            border-radius: 5px;
+            border-style: none;
+            margin: auto;
+            padding: 2px;
+            background-color: #ffcc99;
+            min-width: 40px;
+        }
+        #content {
+            background-color: #886622;
+            padding: 5px;
+            max-width: 300px;
+            margin: auto;
+        }
+        #attacker, #defender {
+            display: flex;
+            justify-content: space-between;
+            max-width: 360px;
+        }
+        .statBoxAttacker, .statBoxDefender, .mods, .mod {
+            background-color: #AA6622;
+            padding: 2px;
+            border: 1px solid #000000;
+            font-size: 0.9em;
+        }
+        .statBoxDefender {
+            background-color: #886644;
+        }
+        #modbox {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            align-items: flex-start;
+        }
+        .mods {
+            background-color: #cc8844;
+            padding: 5px;
+            margin: 10px;
+            color: #000000;
+            font-weight: normal;
+        }
+        .mod {
+            width: 240px;
+            background-color: #eeaa66;
+            padding: 5px;
+            border: 1px solid #000000;
+            margin: 2px;
+        }
+
+        #output {
+            background-color: #000000;
+            color: #FFFFFF;
+            padding: 5px;
+        }
+        h1, h2, h3, hr {
+            /* width: 240px; */
+        }
+        hr {
+            color: #000000;
+        }
+        h2 {
+            font-size: 1em;
+            padding: 2px;
+        }
+        h3 {
+            text-align: center;
+            font-size: 1em;
+            padding: 5px;
+            background-color: #000000;
+            margin: 4px;
+            min-width: 50px;
+        }
+        .ui-accordion-header-active {
+            background-color: #333333;
+            /* width: 240px; */
+        }
+        button {
+          background-color: #000000;
+          border: 2px solid #666666;
+          color: white;
+          padding: 5px;;
+          text-align: center;
+          text-decoration: none;
+          /* display: inline-block; */
+          margin: 2px;
+        }
+        button:hover{
+            background-color: #333333;
+        }
+        button:focus{
+            background-color: #666666;
+        }
+        .outputCataR {
+            color: #cc3333;
+            text-shadow: 1px 1px #993333;
+        }
+        .outputCataG {
+            color: #33cc33;
+            text-shadow: 1px 1px #339933;
+        }
+        .outputCataB {
+            color: #3333cc;
+            text-shadow: 1px 1px #333399;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script>
+        $( function() {
+          $( "#modbox" ).accordion({
+              active: false,
+              collapsible: true,
+              animate: {
+                easing: 'linear',
+                duration: 100},
+          });
+        });
+    </script>
+</head>
+
+<body>
+    <h1 align="center">40kroller</h1>
+    <div id="content">
+
+        <!-- Attacker -->
+
+        <!-- <h2>Attacker's Stats</h2> -->
+        <div id="attacker">
+            <div class="statBoxAttacker" id="attackerModels">
+                <label for="attackerModelsbox">Mdls</label><br>
+                <input type="number" name="attackerModelsbox" id="attackerModelsbox" size=2>
+            </div>
+            <div class="statBoxAttacker" id="attackerA">
+                <label for="attackerAbox">A</label><br>
+                <input type="number" name="attackerAbox" id="attackerAbox" size=1>
+            </div>
+            <div class="statBoxAttacker" id="attackerAS">
+                <label for="attackerASbox">AS</label><br>
+                <input type="number" name="attackerASbox" id="attackerASbox" size=1>
+            </div>
+            <div class="statBoxAttacker" id="attackerS">
+                <label for="attackerSbox">S</label><br>
+                <input type="number" name="attackerSbox" id="attackerSbox" size=1>
+            </div>
+            <div class="statBoxAttacker" id="attackerAP">
+                <label for="attackerAPbox">AP</label><br>
+                <input type="number" name="attackerAPbox" id="attackerAPbox" size=1>
+            </div>
+        </div>
+        <hr>
+
+        <!-- Defender -->
+
+        <!-- <h2>Defender's Stats</h2> -->
+        <div id="defender">
+            <div class="statBoxDefender" id="defenderModels">
+                <label for="defenderModelsbox">Mdls</label><br>
+                <input type="number" name="defenderModelsbox" id="defenderModelsbox" size=2>
+            </div>
+            <div class="statBoxDefender" id="defenderT">
+                <label for="defenderTbox">T</label><br>
+                <input type="number" name="defenderTbox" id="defenderTbox" size=1>
+            </div>
+            <div class="statBoxDefender" id="defenderW">
+                <label for="defenderWbox">W</label><br>
+                <input type="number" name="defenderWbox" id="defenderWbox" size=2>
+            </div>
+            <div class="statBoxDefender" id="defenderSv">
+                <label for="defenderSvbox">Sv</label><br>
+                <input type="number" name="defenderSvbox" id="defenderSvbox" size=1>
+            </div>
+        </div>
+        <hr>
+
+        <!-- Hit Mods -->
+
+        <div id="modbox">
+            <h3>Hit</h3>
+            <div class="mods">
+                <div class="mod">
+                    <label for="HitMod">Modifier </label>
+                    <input type="number" name="HitMod" id="HitMod" size=1 value=0>
+                </div>
+                <div class="mod">
+                    <input type="checkbox" id="rerollhit"> Re-roll
+                    <input type="number" name="rerollHITagainst" id="rerollHITagainst" size=1 value=1> or less
+                </div>
+                <div class="mod">
+                    <input type="checkbox" id="explode6"> Bonus Attack on 6's
+                </div>
+                <div class="mod">
+                    <input type="checkbox" id="autowound6"> Auto-wound on 6's
+                </div>
+            </div>
+
+            <!-- Wound mods -->
+
+            <h3>Wound</h3>
+            <div class="mods">
+                <div class="mod">
+                    <label for="WMod">Modifier </label>
+                    <input type="number" name="WMod" id="WMod" size=1 value=0>
+                </div>
+                <div class="mod">
+                    <input type="checkbox" id="rerollwound"> Re-roll
+                    <input type="number" name="rerollWDagainst" id="rerollWDagainst" size=1 value=1> or less
+                </div>
+                <div class="mod">
+                    <input type="checkbox" id="mwo6"> Mortals on 6's
+                </div>
+                <div class="mod">
+                    <input type="checkbox" id="apo6"> Bonus AP on 6's
+                    <input type="number" name="apo6amount" id="apo6amount" size=1 value=3>
+                </div>
+            </div>
+
+            <!-- Save Mods -->
+
+            <h3>Save</h3>
+            <div class="mods">
+                <div class="mod">
+                    <label for="SvMod">Modifier </label>
+                    <input type="number" name="SvMod" id="SvMod" size=1 value=0>
+                </div>
+                <div class="mod">
+                    <input type="checkbox" id="defenderInvChecked"> Invulnerable Save
+                    <input type="number" name="defenderInvbox" id="defenderInvbox" size=1 value=7>
+                </div>
+                <div class="mod">
+                    <input type="checkbox" id="defenderFNPChecked"> Feel No Pain
+                    <input type="number" name="defenderFNPbox" id="defenderFNPbox" size=1 value=7>
+                </div>
+            </div>
+
+            <!-- Damage mods -->
+
+            <h3>Damage</h3>
+            <div class="mods">
+
+                <div class="mod" id="attackerD">
+                    <label for="attackerDmultibox">Dice</label>
+                    <input type="number" name="attackerDmultibox" id="attackerDmultibox" size=1 value=0> (0 for flat damage)
+                </div>
+
+                <div class="mod" id="attackerD">
+                    <label for="attackerDdenombox">Max Damage</label>
+                    <input type="number" name="attackerDdenombox" id="attackerDdenombox" size=1 value=1>
+                </div>
+
+                <div class="mod" id="attackerD">
+                    <label for="attackerDmodbox">Modifier</label>
+                    <input type="number" name="attackerDmodbox" id="attackerDmodbox" size=1 value=0>
+                </div>
+                <div class="mod" id="attackerD">
+                    <label for="flatDRbox">Shield Reduction</label>
+                    <input type="number" name="flatDRbox" id="flatDRbox" size=1 value=0>
+                </div>
+            </div>
+
+        </div>
+        <!-- Buttons -->
+        <hr>
+        <div class="mods" style="display: flex; flex-wrap: wrap; justify-content: center;">
+            <button type="button" name="button" onclick="krunchit(1)">Krunch the numbers!</button>
+            <button type="button" name="button" onclick="krunchit(100)">KRUSH the numbers!</button>
+            <button type="button" name="button" onclick="krunchit(1000)">EXTERMINATUS the numbers!</button>
+        </div>
+        <hr>
+        <div id="output">
+
+        </div>
+    </div>
+    <script type="text/javascript">
+        var debug = false;
+
+        function roll(multi = 1, denom = 6, mod = 0) {
+            let result = 0;
+            for (let rolls = 0; rolls < multi; rolls++) {
+                result += Math.ceil(Math.random() * denom);
+            }
+            result += mod;
+            return result;
+        }
+
+        function check(result, against, higher = true) {
+            if (higher) return result >= against
+            else return result <= against
+
+        }
+
+        function getBoxes() {
+            // Attack/Defend boxes
+            attackerModels = Number(document.getElementById('attackerModelsbox').value);
+            attackerA = Number(document.getElementById('attackerAbox').value);
+            attackerAS = Number(document.getElementById('attackerASbox').value);
+            attackerS = Number(document.getElementById('attackerSbox').value);
+            attackerAP = Number(document.getElementById('attackerAPbox').value);
+            defenderModels = Number(document.getElementById('defenderModelsbox').value);
+            defenderT = Number(document.getElementById('defenderTbox').value);
+            defenderW = Number(document.getElementById('defenderWbox').value);
+            defenderSv = Number(document.getElementById('defenderSvbox').value);
+
+            //Hit Modifiers
+            hitMod = document.getElementById('HitMod').checked;
+            if (document.getElementById('rerollhit').checked) rerollHITagainst = Number(document.getElementById('rerollHITagainst').value)
+            else rerollHITagainst = 0;
+            exploding6s = document.getElementById('explode6').checked;
+            autowound6s = document.getElementById('autowound6').checked;
+            //Wounds Modifiers
+            wMod = document.getElementById('WMod').checked;
+            if (document.getElementById('rerollwound').checked) rerollWDagainst = Number(document.getElementById('rerollWDagainst').value)
+            else rerollWDagainst = 0;
+            mortalson6s = document.getElementById('mwo6').checked;
+            apon6s = document.getElementById('apo6').checked;
+            apo6amount = Number(document.getElementById('apo6amount').value);
+            //Save Modifiers
+            svMod = document.getElementById('SvMod').checked;
+            invuln = document.getElementById('defenderInvChecked').checked;
+            defenderInv = Number(document.getElementById('defenderInvbox').value);
+            fnp = document.getElementById('defenderFNPChecked').checked;
+            defenderFNP = Number(document.getElementById('defenderFNPbox').value);
+            //Damage Modifiers
+            attackerDmulti = Number(document.getElementById('attackerDmultibox').value);
+            attackerDdenom = Number(document.getElementById('attackerDdenombox').value);
+            attackerDmod = Number(document.getElementById('attackerDmodbox').value);
+            flatDR = Number(document.getElementById('flatDRbox').value);
+            //Output box
+            outputBox = document.getElementById('output');
+
+        }
+
+        function krunchit(iterations) {
+            getBoxes();
+            let hits = 0;
+            let hitreroll = 0;
+            let woundreroll = 0;
+            let wounds = 0;
+            let apwounds = 0;
+            let mortals = 0;
+            let saves = 0;
+            let invulns = 0;
+            let damage = 0;
+            let shielded = 0;
+            let modelHP = defenderW;
+            let modelsKilled = 0;
+            let unfelt = 0;
+            var effdam = 0;
+            var epda = 0;
+            var attacksMade = 0;
+            var squadwipe = 0;
+
+            // Loop as many times as told for every model
+            for (let model_i = 0; model_i < attackerModels * iterations; model_i++) {
+                // Start counting bonus attacks
+                let bonusAttack = 0;
+                if (debug) console.log("[DEBUG] " + "Models " + model_i)
+                // Loop for every model's attacks
+                for (let attack_i = 0; attack_i < attackerA + bonusAttack; attack_i++) {
+                    if (debug) console.log("\t[DEBUG] " + "Hit: " + attack_i)
+                    let result = roll(1, 6, hitMod);
+                    if (check(result, rerollHITagainst, false)) {
+                        if (debug) console.log("\t\t[DEBUG] " + "Reroll hit!")
+                        let result = roll(1, 6, hitMod);
+                        hitreroll++;
+                    }
+                    if (debug) console.log("\t\t[DEBUG] " + "result " + result + " against " + attackerAS)
+                    if (exploding6s && check(result, 6) && attack_i < attacker) {
+                        bonusAttack++;
+                        if (debug) console.log("\t\t[DEBUG] " + "Bonus attack!")
+                    }
+                    if (autowound6s && check(result, 6)) {
+                        wounds++;
+                        if (debug) console.log("\t\t[DEBUG] " + "Auto-wound!")
+                    }
+                    if (debug && check(result, attackerAS)) console.log("\t[DEBUG] " + "Hit!")
+                    hits += Number(check(result, attackerAS));
+                }
+            }
+            if (debug) console.log("Hits: " + hits)
+            for (let hits_i = 0; hits_i < hits; hits_i++) {
+                if (debug) console.log("\t[DEBUG] " + "Wound: " + hits_i)
+                let result = roll(1, 6, wMod);
+                // Was it low enough to re-roll?
+                if (check(result, rerollWDagainst, false)) {
+                    if (debug) console.log("\t\t[DEBUG] " + "Reroll wound!")
+                    result = roll(1, 6, wMod);
+                    woundreroll++;
+                }
+                if (mortalson6s && check(result, 6)) {
+                    mortals++;
+                    if (debug) console.log("\t\t[DEBUG] " + "Mortal wound!")
+                }
+                if (apon6s && check(result, 6)) {
+                    apwounds++;
+                    if (debug) console.log("\t\t[DEBUG] " + "Bonus AP wound!")
+                } else {
+                    let against = 0;
+                    if (attackerS / 2 >= defenderT) against = 2;
+                    else if (attackerS > defenderT) against = 3;
+                    else if (attackerS == defenderT) against = 4;
+                    else if (attackerS > defenderT / 2) against = 5;
+                    else against = 6;
+                    wounds += Number(check(result, against))
+                    if (debug) console.log("\t\t[DEBUG] " + "result " + result + " against " + against)
+                }
+            }
+            if (debug) console.log("Wounds: " + wounds)
+            for (let wounds_i = 0; wounds_i < wounds + apwounds; wounds_i++) {
+                // Make one save roll
+                if (debug) console.log("\t[DEBUG] " + "Save: " + wounds_i)
+                let result = roll();
+                let against = 0;
+                let basicsave;
+                if (wounds_i < wounds) basicsave = defenderSv + attackerAP;
+                else basicsave = defenderSv + attackerAP + apo6amount;
+                if (basicsave > defenderInv && def) against = defenderInv;
+                else against = basicsave;
+                // A 1 on a save is always a fail
+                if (result != 1) {
+                    if (debug) console.log("\t\t[DEBUG] " + "result " + result + " against " + against)
+                    if (debug && check(result, attackerAS)) console.log("\t\t[DEBUG] " + "Wound!")
+                    invulns += Number(check(result, defenderInv));
+                } else {
+                    if (debug && check(result, attackerAS)) console.log("\t\t[DEBUG] " + "Save!")
+                    saves += 1;
+                }
+            }
+            let effdamage = 0
+            if (debug) console.log("Unsaved: " + Number(wounds - saves - invulns))
+            for (let unsaved_i = 0; unsaved_i < wounds - saves; unsaved_i++) {
+                if (debug) console.log("[DEBUG] " + "Save: " + unsaved_i)
+                let result;
+                if (!attackerDmulti) {
+                    result = attackerDdenom + attackerDmod;
+                } else {
+                    result = roll(attackerDmulti, attackerDdenom, attackerDmod);
+                }
+                if (result - flatDR > 1) {
+                    result = result - flatDR;
+                    shielded -= flatDR - result;
+                } else {
+                    result = 1;
+                }
+                damage += result;
+                effdamage += result;
+                for (let damage_i = 0; damage_i < result; damage_i++) {
+                    if (check(roll(), defenderFNP)) {
+                        effdamage--;
+                        unfelt++;
+                    } else {
+                        modelHP--;
+                        if (!modelHP) {
+                            modelsKilled++;
+                            if (defenderModels) squadwipe = Math.floor(modelsKilled / defenderModels);
+                            modelHP = defenderW;
+                            effdamage -= result - (damage_i + 1)
+                            break;
+                        }
+                    }
+                }
+            }
+            outputBox.innerHTML = "";
+            if (hits) outputBox.innerHTML += "<span class='outputCataR'>Hits</span>: " + hits + "<br>"
+            if (hitreroll) outputBox.innerHTML += "<span class='outputCataB'>Hit re-rolls</span>: " + hitreroll + "<br>"
+            if (wounds + apwounds) outputBox.innerHTML += "<span class='outputCataR'>Wounds</span>: " + Number(wounds + apwounds) + "<br>"
+            if (woundreroll) outputBox.innerHTML += "<span class='outputCataB'>Wound re-rolls</span>: " + woundreroll + "<br>"
+            if (saves) outputBox.innerHTML += "<span class='outputCataB'>Saves</span>: " + saves + "<br>"
+            if (invuln) outputBox.innerHTML += "<span class='outputCataB'>Invulnerable Saves</span>: " + invulns + "<br>"
+            if (unfelt) outputBox.innerHTML += "<span class='outputCataB'>Feel No Pains</span>: " + unfelt + "<br>"
+            if (damage) outputBox.innerHTML += "<span class='outputCataR'>Damage</span>: " + damage + "<br>"
+            if (shielded) outputBox.innerHTML += "<span class='outputCataB'>Shielded</span>: " + shielded + "<br>"
+            if (mortals) outputBox.innerHTML += "<span class='outputCataR'>Mortal Wounds</span>: " + mortals + "<br>"
+            if (modelsKilled) outputBox.innerHTML += "<span class='outputCataR'>Models Killed</span>: " + modelsKilled + "<br>"
+            if (squadwipe) outputBox.innerHTML += "<span class='outputCataR'>Squads Wiped</span>: " + squadwipe + "<br>"
+            outputBox.innerHTML += "<span class='outputCataG'>Effective Damage</span>: " + effdamage + "<br>"
+            outputBox.innerHTML += "<span class='outputCataG'>EDPA</span>: " + Number(effdamage / ((attackerModels * iterations) * attackerA)) + "<br>"
+            outputBox.innerHTML += "<span class='outputCataG'>EDPP</span>: " + Number(effdamage / iterations) + "<br>"
+        }
+    </script>
+</body>
+
+</html>
