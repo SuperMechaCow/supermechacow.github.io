@@ -232,7 +232,7 @@
                     <input type="number" name="apo6amount" id="apo6amount" size=1 value=3>
                 </div>
                 <div class="mod">
-                    Ignore rolls below
+                    Ignore rolls below 
                     <input type="number" name="ignorebelowamount" id="ignorebelowamount" size=1 value=0>
                 </div>
             </div>
@@ -418,15 +418,16 @@
                 if (apon6s && check(result, 6)) {
                     apwounds++;
                     if (debug) console.log("\t\t[DEBUG] " + "Bonus AP wound!")
-                }  else {
+                } else if (result <= ignorebelowamount) {
+                    ignored++;
+                } else {
                     let against = 0;
                     if (attackerS / 2 >= defenderT) against = 2;
                     else if (attackerS > defenderT) against = 3;
                     else if (attackerS == defenderT) against = 4;
                     else if (attackerS > defenderT / 2) against = 5;
                     else against = 6;
-                    if (Number(check(result, ignorebelowamount, false)) && ignorebelowamount >= against) ignored++;
-                    else wounds += Number(check(result, against))
+                    wounds += Number(check(result, against))
                     if (debug) console.log("\t\t[DEBUG] " + "result " + result + " against " + against)
                 }
             }
@@ -439,7 +440,7 @@
                 let basicsave;
                 if (wounds_i < wounds) basicsave = defenderSv + attackerAP;
                 else basicsave = defenderSv + attackerAP + apo6amount;
-                if (basicsave > defenderInv && invuln) against = defenderInv;
+                if (basicsave > defenderInv && def) against = defenderInv;
                 else against = basicsave;
                 // A 1 on a save is always a fail
                 if (result != 1) {
@@ -490,11 +491,11 @@
             if (hitreroll) outputBox.innerHTML += "<span class='outputCataB'>Hit re-rolls</span>: " + hitreroll + "<br>"
             if (wounds + apwounds) outputBox.innerHTML += "<span class='outputCataR'>Wounds</span>: " + Number(wounds + apwounds) + "<br>"
             if (woundreroll) outputBox.innerHTML += "<span class='outputCataB'>Wound re-rolls</span>: " + woundreroll + "<br>"
-            if (ignored) outputBox.innerHTML += "<span class='outputCataB'>Ignored Wounds</span>: " + ignored + "<br>"
             if (saves) outputBox.innerHTML += "<span class='outputCataB'>Saves</span>: " + saves + "<br>"
             if (invuln) outputBox.innerHTML += "<span class='outputCataB'>Invulnerable Saves</span>: " + invulns + "<br>"
-            if (damage) outputBox.innerHTML += "<span class='outputCataR'>Damage</span>: " + damage + "<br>"
             if (unfelt) outputBox.innerHTML += "<span class='outputCataB'>Feel No Pains</span>: " + unfelt + "<br>"
+            if (ignored) outputBox.innerHTML += "<span class='outputCataB'>Ignored Wounds</span>: " + ignored + "<br>"
+            if (damage) outputBox.innerHTML += "<span class='outputCataR'>Damage</span>: " + damage + "<br>"
             if (shielded) outputBox.innerHTML += "<span class='outputCataB'>Shielded</span>: " + shielded + "<br>"
             if (mortals) outputBox.innerHTML += "<span class='outputCataR'>Mortal Wounds</span>: " + mortals + "<br>"
             if (modelsKilled) outputBox.innerHTML += "<span class='outputCataR'>Models Killed</span>: " + modelsKilled + "<br>"
