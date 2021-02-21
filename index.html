@@ -121,6 +121,15 @@
             color: #3333cc;
             text-shadow: 1px 1px #333399;
         }
+        .ui-tooltip-content {
+            max-width: 200px;
+            background-color: #000000;
+            border: 1px solid #cccccc;
+            padding: 5px;
+        }
+        .ui-helper-hidden-accessible {
+            visibility: hidden;
+        }
     </style>
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
@@ -134,6 +143,11 @@
                 easing: 'linear',
                 duration: 100},
           });
+          $( document ).tooltip({
+              show: false,
+              hide: false,
+
+          });
         });
     </script>
 </head>
@@ -146,23 +160,23 @@
 
         <!-- <h2>Attacker's Stats</h2> -->
         <div id="attacker">
-            <div class="statBoxAttacker" id="attackerModels">
+            <div class="statBoxAttacker" id="attackerModels"  title="The number of models in the attacking unit.">
                 <label for="attackerModelsbox">Mdls</label><br>
                 <input type="number" name="attackerModelsbox" id="attackerModelsbox" size=2>
             </div>
-            <div class="statBoxAttacker" id="attackerA">
+            <div class="statBoxAttacker" id="attackerA" title="The number of attacks each model can make.">
                 <label for="attackerAbox">A</label><br>
                 <input type="number" name="attackerAbox" id="attackerAbox" size=1>
             </div>
-            <div class="statBoxAttacker" id="attackerAS">
+            <div class="statBoxAttacker" id="attackerAS" title="The WS or BS of the attack (Attack Skill).">
                 <label for="attackerASbox">AS</label><br>
                 <input type="number" name="attackerASbox" id="attackerASbox" size=1>
             </div>
-            <div class="statBoxAttacker" id="attackerS">
+            <div class="statBoxAttacker" id="attackerS" title="The Strength of the model OR weapon used.">
                 <label for="attackerSbox">S</label><br>
                 <input type="number" name="attackerSbox" id="attackerSbox" size=1>
             </div>
-            <div class="statBoxAttacker" id="attackerAP">
+            <div class="statBoxAttacker" id="attackerAP" title="The AP (no \'-\' symbol!) of the weapon used.">
                 <label for="attackerAPbox">AP</label><br>
                 <input type="number" name="attackerAPbox" id="attackerAPbox" size=1>
             </div>
@@ -173,19 +187,19 @@
 
         <!-- <h2>Defender's Stats</h2> -->
         <div id="defender">
-            <div class="statBoxDefender" id="defenderModels">
+            <div class="statBoxDefender" id="defenderModels" title="The number of models in the defending unit.">
                 <label for="defenderModelsbox">Mdls</label><br>
                 <input type="number" name="defenderModelsbox" id="defenderModelsbox" size=2>
             </div>
-            <div class="statBoxDefender" id="defenderT">
+            <div class="statBoxDefender" id="defenderT" title="The toughness of models in the defending unit.">
                 <label for="defenderTbox">T</label><br>
                 <input type="number" name="defenderTbox" id="defenderTbox" size=1>
             </div>
-            <div class="statBoxDefender" id="defenderW">
+            <div class="statBoxDefender" id="defenderW" title="The number of Wounds each model in the defending unit has.">
                 <label for="defenderWbox">W</label><br>
                 <input type="number" name="defenderWbox" id="defenderWbox" size=2>
             </div>
-            <div class="statBoxDefender" id="defenderSv">
+            <div class="statBoxDefender" id="defenderSv" title="The Save characteristic of the models in the defending unit.">
                 <label for="defenderSvbox">Sv</label><br>
                 <input type="number" name="defenderSvbox" id="defenderSvbox" size=1>
             </div>
@@ -195,44 +209,47 @@
         <!-- Hit Mods -->
 
         <div id="modbox">
-            <h3>Hit</h3>
+            <h3 title="Hit roll modifiers">Hit</h3>
             <div class="mods">
-                <div class="mod">
+                <div class="mod" title="Add this to the die roll.">
                     <label for="HitMod">Modifier </label>
-                    <input type="number" name="HitMod" id="HitMod" size=1 value=0>
+                    <input type="number" name="HitMod" id="HitMod" size=1 value=0 title="">
                 </div>
-                <div class="mod">
-                    <input type="checkbox" id="rerollhit"> Re-roll
-                    <input type="number" name="rerollHITagainst" id="rerollHITagainst" size=1 value=1> or less
+                <div class="mod" title="Reroll the hit roll if it\'s lower than this number.">
+                    <input type="checkbox" id="rerollhit" title=""> Re-roll
+                    <input type="number" name="rerollHITagainst" id="rerollHITagainst" size=1 value=1 title=""> or less
                 </div>
-                <div class="mod">
-                    <input type="checkbox" id="explode6"> Bonus Attack on 6's
+                <div class="mod"  title="Attack again if you roll a 6">
+                    <input type="checkbox" id="explode6" title=""> Bonus Attack on 6's
                 </div>
-                <div class="mod">
+                <div class="mod" title="This hit always hits on a 6">
+                    <input type="checkbox" id="extrahit6"> Auto-hit on 6's
+                </div>
+                <div class="mod"  title="This hit automatically hits and wounds on a 6">
                     <input type="checkbox" id="autowound6"> Auto-wound on 6's
                 </div>
             </div>
 
             <!-- Wound mods -->
 
-            <h3>Wound</h3>
+            <h3 title="Wound roll modifiers">Wound</h3>
             <div class="mods">
-                <div class="mod">
+                <div class="mod" title="Add this to the die roll.">
                     <label for="WMod">Modifier </label>
                     <input type="number" name="WMod" id="WMod" size=1 value=0>
                 </div>
-                <div class="mod">
+                <div class="mod" title="Reroll the wound roll if it\'s lower than this number.">
                     <input type="checkbox" id="rerollwound"> Re-roll
                     <input type="number" name="rerollWDagainst" id="rerollWDagainst" size=1 value=1> or less
                 </div>
-                <div class="mod">
+                <div class="mod" title="Inflict a Mortal Wound on a roll of 6">
                     <input type="checkbox" id="mwo6"> Mortals on 6's
                 </div>
-                <div class="mod">
+                <div class="mod"  title="Hit with additional AP on a 6">
                     <input type="checkbox" id="apo6"> Bonus AP on 6's
                     <input type="number" name="apo6amount" id="apo6amount" size=1 value=3>
                 </div>
-                <div class="mod">
+                <div class="mod" title="Ignore all wound rolls at or below this number (like Transhuman Physiology)">
                     Ignore rolls below
                     <input type="number" name="ignorebelowamount" id="ignorebelowamount" size=1 value=0>
                 </div>
@@ -240,17 +257,17 @@
 
             <!-- Save Mods -->
 
-            <h3>Save</h3>
+            <h3 title="Save roll modifiers">Save</h3>
             <div class="mods">
-                <div class="mod">
+                <div class="mod" title="Add this to the die roll.">
                     <label for="SvMod">Modifier </label>
                     <input type="number" name="SvMod" id="SvMod" size=1 value=0>
                 </div>
-                <div class="mod">
+                <div class="mod" title="Defender as an Invulnerable save.">
                     <input type="checkbox" id="defenderInvChecked"> Invulnerable Save
                     <input type="number" name="defenderInvbox" id="defenderInvbox" size=1 value=7>
                 </div>
-                <div class="mod">
+                <div class="mod" title="Roll a D6 for each point of damage. If it's higher than this number remove that point of damage.">
                     <input type="checkbox" id="defenderFNPChecked"> Feel No Pain
                     <input type="number" name="defenderFNPbox" id="defenderFNPbox" size=1 value=7>
                 </div>
@@ -258,24 +275,24 @@
 
             <!-- Damage mods -->
 
-            <h3>Damage</h3>
+            <h3 title="Damage roll modifiers">Damage</h3>
             <div class="mods">
 
-                <div class="mod" id="attackerD">
+                <div class="mod" id="attackerD" title="How many dice do you roll for damage? If 0, then it will always be the Max Damage below.">
                     <label for="attackerDmultibox">Dice</label>
                     <input type="number" name="attackerDmultibox" id="attackerDmultibox" size=1 value=0> (0 for flat damage)
                 </div>
 
-                <div class="mod" id="attackerD">
+                <div class="mod" id="attackerD" title="The flat damage (if 0 dice are used) or the maximum sides the damage dice can have.">
                     <label for="attackerDdenombox">Max Damage</label>
                     <input type="number" name="attackerDdenombox" id="attackerDdenombox" size=1 value=1>
                 </div>
 
-                <div class="mod" id="attackerD">
+                <div class="mod" id="attackerD" title="Add this to the damage roll">
                     <label for="attackerDmodbox">Modifier</label>
                     <input type="number" name="attackerDmodbox" id="attackerDmodbox" size=1 value=0>
                 </div>
-                <div class="mod" id="attackerD">
+                <div class="mod" id="attackerD" title="Reduce damage by this much, to a minimum of 1. (Serpent Shield or Disgustingly Resilient)">
                     <label for="flatDRbox">Shield Reduction</label>
                     <input type="number" name="flatDRbox" id="flatDRbox" size=1 value=0>
                 </div>
@@ -285,9 +302,9 @@
         <!-- Buttons -->
         <hr>
         <div class="mods" style="display: flex; flex-wrap: wrap; justify-content: center;">
-            <button type="button" name="button" onclick="krunchit(1)">Krunch the numbers!</button>
-            <button type="button" name="button" onclick="krunchit(100)">KRUSH the numbers!</button>
-            <button type="button" name="button" onclick="krunchit(1000)">EXTERMINATUS the numbers!</button>
+            <button type="button" name="button" onclick="krunchit(1)" title="Simulate 1 time.">Krunch the numbers!</button>
+            <button type="button" name="button" onclick="krunchit(100)" title="Simulate 100 time.">KRUSH the numbers!</button>
+            <button type="button" name="button" onclick="krunchit(1000)" title="Simulate 1000 time.">EXTERMINATUS the numbers!</button>
         </div>
         <hr>
         <div id="output">
@@ -336,6 +353,7 @@
             else rerollWDagainst = 0;
             mortalson6s = document.getElementById('mwo6').checked;
             apon6s = document.getElementById('apo6').checked;
+            extrahit6 = document.getElementById('extrahit6').checked;
             apo6amount = Number(document.getElementById('apo6amount').value);
             ignorebelowamount = Number(document.getElementById('ignorebelowamount').value);
             //Save Modifiers
@@ -358,6 +376,8 @@
             getBoxes();
             let hits = 0;
             let hitreroll = 0;
+            let extrahits = 0;
+            let extrawounds = 0;
             let woundreroll = 0;
             let wounds = 0;
             let apwounds = 0;
@@ -384,7 +404,7 @@
                 for (let attack_i = 0; attack_i < attackerA + bonusAttack; attack_i++) {
                     if (debug) console.log("\t[DEBUG] " + "Hit: " + attack_i)
                     let result = roll(1, 6, hitMod);
-                    if (check(result, rerollHITagainst, false)) {
+                    if (check(result, rerollHITagainst, false) && !check(result, attackerAS)) {
                         if (debug) console.log("\t\t[DEBUG] " + "Reroll hit!")
                         let result = roll(1, 6, hitMod);
                         hitreroll++;
@@ -394,12 +414,19 @@
                         bonusAttack++;
                         if (debug) console.log("\t\t[DEBUG] " + "Bonus attack!")
                     }
+                    if (extrahit6 && check(result, 6)) {
+                        hits++;
+                        extrahits++;
+                        if (debug) console.log("\t\t[DEBUG] " + "Auto-hit!")
+                    }
                     if (autowound6s && check(result, 6)) {
                         wounds++;
+                        extrawounds++;
                         if (debug) console.log("\t\t[DEBUG] " + "Auto-wound!")
+                    } else {
+                        if (debug && check(result, attackerAS)) console.log("\t[DEBUG] " + "Hit!")
+                        hits += Number(check(result, attackerAS));
                     }
-                    if (debug && check(result, attackerAS)) console.log("\t[DEBUG] " + "Hit!")
-                    hits += Number(check(result, attackerAS));
                 }
             }
             if (debug) console.log("Hits: " + hits)
@@ -487,22 +514,24 @@
                 }
             }
             outputBox.innerHTML = "";
-            if (hits) outputBox.innerHTML += "<span class='outputCataR'>Hits</span>: " + hits + "<br>"
-            if (hitreroll) outputBox.innerHTML += "<span class='outputCataB'>Hit re-rolls</span>: " + hitreroll + "<br>"
-            if (wounds + apwounds) outputBox.innerHTML += "<span class='outputCataR'>Wounds</span>: " + Number(wounds + apwounds) + "<br>"
-            if (woundreroll) outputBox.innerHTML += "<span class='outputCataB'>Wound re-rolls</span>: " + woundreroll + "<br>"
-            if (ignored) outputBox.innerHTML += "<span class='outputCataB'>Ignored Wounds</span>: " + ignored + "<br>"
-            if (saves) outputBox.innerHTML += "<span class='outputCataB'>Saves</span>: " + saves + "<br>"
-            if (invuln) outputBox.innerHTML += "<span class='outputCataB'>Invulnerable Saves</span>: " + invulns + "<br>"
-            if (damage) outputBox.innerHTML += "<span class='outputCataR'>Damage</span>: " + damage + "<br>"
-            if (unfelt) outputBox.innerHTML += "<span class='outputCataB'>Feel No Pains</span>: " + unfelt + "<br>"
-            if (shielded) outputBox.innerHTML += "<span class='outputCataB'>Shielded</span>: " + shielded + "<br>"
-            if (mortals) outputBox.innerHTML += "<span class='outputCataR'>Mortal Wounds</span>: " + mortals + "<br>"
-            if (modelsKilled) outputBox.innerHTML += "<span class='outputCataR'>Models Killed</span>: " + modelsKilled + "<br>"
-            if (squadwipe) outputBox.innerHTML += "<span class='outputCataR'>Squads Wiped</span>: " + squadwipe + "<br>"
-            outputBox.innerHTML += "<span class='outputCataG'>Effective Damage</span>: " + effdamage + "<br>"
-            outputBox.innerHTML += "<span class='outputCataG'>EDPA</span>: " + Number(effdamage / ((attackerModels * iterations) * attackerA)) + "<br>"
-            outputBox.innerHTML += "<span class='outputCataG'>EDPP</span>: " + Number(effdamage / iterations) + "<br>"
+            if (hits) outputBox.innerHTML += "<span class='outputCataR' title='The number of successful Hit rolls.'>Hits</span>: " + hits + "<br>"
+            if (hitreroll) outputBox.innerHTML += "<span class='outputCataB' title='The number of Hit rerolls that would have been failures.'>Hit re-rolls</span>: " + hitreroll + "<br>"
+            if (extrahits) outputBox.innerHTML += "<span class='outputCataB' title='How many auto-hits you scored'>Auto-hits</span>: " + extrahits + "<br>"
+            if (wounds + apwounds) outputBox.innerHTML += "<span class='outputCataR' title='The number of successful Wound rolls'>Wounds</span>: " + Number(wounds + apwounds) + "<br>"
+            if (extrawounds) outputBox.innerHTML += "<span class='outputCataB' title='How many auto-wounds you scored'>Auto-wounds</span>: " + extrahits + "<br>"
+            if (woundreroll) outputBox.innerHTML += "<span class='outputCataB' title='The number of Wound rerolls that would have been failures.'>Wound re-rolls</span>: " + woundreroll + "<br>"
+            if (ignored) outputBox.innerHTML += "<span class='outputCataB' title='The number of wounds that were ignored that would have been successful.'>Ignored Wounds</span>: " + ignored + "<br>"
+            if (saves) outputBox.innerHTML += "<span class='outputCataB' title='The number of saves that the defender would have made normally.'>Saves</span>: " + saves + "<br>"
+            if (invuln) outputBox.innerHTML += "<span class='outputCataB' title='The number of saves that the defender would have made with Invulnerable saves.'>Invulnerable Saves</span>: " + invulns + "<br>"
+            if (damage) outputBox.innerHTML += "<span class='outputCataR' title='The amount of damage that was rolled for, before considering target Wounds characteristic or mitigation.'>Damage</span>: " + damage + "<br>"
+            if (unfelt) outputBox.innerHTML += "<span class='outputCataB' title='The amount of damage prevented by Feel No Pain'>Feel No Pains</span>: " + unfelt + "<br>"
+            if (shielded) outputBox.innerHTML += "<span class='outputCataB' title='The amount of damage prevented by Damage Reduction'>Shielded</span>: " + shielded + "<br>"
+            if (mortals) outputBox.innerHTML += "<span class='outputCataR' title='The amount of Mortal wounds inflicted on the target.'>Mortal Wounds</span>: " + mortals + "<br>"
+            if (modelsKilled) outputBox.innerHTML += "<span class='outputCataR' title='The number of models in the defending unit would have killed.'>Models Killed</span>: " + modelsKilled + "<br>"
+            outputBox.innerHTML += "<span class='outputCataG' title='The amount of damage you actually inflicted (excess damage not needed to kill a model is ignored, along with shields and abilities)'>Effective Damage</span>: " + effdamage + "<br>"
+            if (squadwipe) outputBox.innerHTML += "<span class='outputCataR' title=''>Squads Wiped</span>: " + squadwipe + "<br>"
+            outputBox.innerHTML += "<span class='outputCataG' title='Effective Damage Per Attack: How much damage each models attack would have done'>EDPA</span>: " + Number(effdamage / ((attackerModels * iterations) * attackerA)) + "<br>"
+            outputBox.innerHTML += "<span class='outputCataG' title='Effective Damage Per Unit: How much damage the whole units attack would have done'>EDPU</span>: " + Number(effdamage / iterations) + "<br>"
         }
     </script>
 </body>
