@@ -160,11 +160,11 @@
 
         <!-- <h2>Attacker's Stats</h2> -->
         <div id="attacker">
-            <div class="statBoxAttacker" id="attackerModels"  title="The number of models in the attacking unit.">
+            <div class="statBoxAttacker" id="attackerModels" title="The number of models in the attacking unit.">
                 <label for="attackerModelsbox">Mdls</label><br>
                 <input type="number" name="attackerModelsbox" id="attackerModelsbox" size=2>
             </div>
-            <div class="statBoxAttacker" id="attackerA" title="The number of attacks each model can make.">
+            <div class="statBoxAttacker" id="attackerA" title="The number of attacks each model can make. [For random attacks, see 'Hit Modifiers' tab]">
                 <label for="attackerAbox">A</label><br>
                 <input type="number" name="attackerAbox" id="attackerAbox" size=1>
             </div>
@@ -213,19 +213,25 @@
             <div class="mods">
                 <div class="mod" title="Add this to the die roll.">
                     <label for="HitMod">Modifier </label>
-                    <input type="number" name="HitMod" id="HitMod" size=1 value=0 title="">
+                    <input type="number" name="HitMod" id="HitMod" size=1 value=0>
+                </div>
+                <div class="mod" title="Roll xDy+z attacks for each model instead of the flat Attack characteristic.">
+                    <input type="checkbox" id="randomAttacks"> Random number of attacks:<br>
+                    <input type="number" name="randomAttacksDice" id="randomAttacksDice" size=1 value=1>D
+                    <input type="number" name="randomAttacksDenom" id="randomAttacksDenom" size=1 value=6>+
+                    <input type="number" name="randomAttacksMod" id="randomAttacksMod" size=1 value=0>
                 </div>
                 <div class="mod" title="Reroll the hit roll if it\'s lower than this number.">
-                    <input type="checkbox" id="rerollhit" title=""> Re-roll
-                    <input type="number" name="rerollHITagainst" id="rerollHITagainst" size=1 value=1 title=""> or less
+                    <input type="checkbox" id="rerollhit"> Re-roll
+                    <input type="number" name="rerollHITagainst" id="rerollHITagainst" size=1 value=1> or less
                 </div>
-                <div class="mod"  title="Attack again if you roll a 6">
-                    <input type="checkbox" id="explode6" title=""> Bonus Attack on 6's
+                <div class="mod" title="Attack again if you roll a 6">
+                    <input type="checkbox" id="explode6"> Bonus Attack on 6's
                 </div>
                 <div class="mod" title="This hit always hits on a 6">
                     <input type="checkbox" id="extrahit6"> Auto-hit on 6's
                 </div>
-                <div class="mod"  title="This hit automatically hits and wounds on a 6">
+                <div class="mod" title="This hit automatically hits and wounds on a 6">
                     <input type="checkbox" id="autowound6"> Auto-wound on 6's
                 </div>
             </div>
@@ -245,7 +251,7 @@
                 <div class="mod" title="Inflict a Mortal Wound on a roll of 6">
                     <input type="checkbox" id="mwo6"> Mortals on 6's
                 </div>
-                <div class="mod"  title="Hit with additional AP on a 6">
+                <div class="mod" title="Hit with additional AP on a 6">
                     <input type="checkbox" id="apo6"> Bonus AP on 6's
                     <input type="number" name="apo6amount" id="apo6amount" size=1 value=3>
                 </div>
@@ -351,6 +357,10 @@
             wMod = document.getElementById('WMod').checked;
             if (document.getElementById('rerollwound').checked) rerollWDagainst = Number(document.getElementById('rerollWDagainst').value)
             else rerollWDagainst = 0;
+            randomAttacks = document.getElementById('randomAttacks').checked
+            randomAttacksDice = Number(document.getElementById('randomAttacksDice').value)
+            randomAttacksDenom = Number(document.getElementById('randomAttacksDenom').value)
+            randomAttacksMod = Number(document.getElementById('randomAttacksMod').value)
             mortalson6s = document.getElementById('mwo6').checked;
             apon6s = document.getElementById('apo6').checked;
             extrahit6 = document.getElementById('extrahit6').checked;
@@ -399,9 +409,13 @@
             for (let model_i = 0; model_i < attackerModels * iterations; model_i++) {
                 // Start counting bonus attacks
                 let bonusAttack = 0;
+                let attacks = 0;
+                if (randomAttacks) attacks += roll(randomAttacksDice, randomAttacksDenom, randomAttacksMod);
+                else attacks = attackerA;
                 if (debug) console.log("[DEBUG] " + "Models " + model_i)
                 // Loop for every model's attacks
-                for (let attack_i = 0; attack_i < attackerA + bonusAttack; attack_i++) {
+                for (let attack_i = 0; attack_i < attacks + bonusAttack; attack_i++) {
+                    attacksMade++;
                     if (debug) console.log("\t[DEBUG] " + "Hit: " + attack_i)
                     let result = roll(1, 6, hitMod);
                     if (check(result, rerollHITagainst, false) && !check(result, attackerAS)) {
@@ -446,7 +460,7 @@
                 if (apon6s && check(result, 6)) {
                     apwounds++;
                     if (debug) console.log("\t\t[DEBUG] " + "Bonus AP wound!")
-                }  else {
+                } else {
                     let against = 0;
                     if (attackerS / 2 >= defenderT) against = 2;
                     else if (attackerS > defenderT) against = 3;
@@ -514,6 +528,7 @@
                 }
             }
             outputBox.innerHTML = "";
+            if (attacksMade) outputBox.innerHTML += "<span class='outputCataR' title='The number of attacks made on the defending unit.'>Attacks</span>: " + attacksMade + "<br>"
             if (hits) outputBox.innerHTML += "<span class='outputCataR' title='The number of successful Hit rolls.'>Hits</span>: " + hits + "<br>"
             if (hitreroll) outputBox.innerHTML += "<span class='outputCataB' title='The number of Hit rerolls that would have been failures.'>Hit re-rolls</span>: " + hitreroll + "<br>"
             if (extrahits) outputBox.innerHTML += "<span class='outputCataB' title='How many auto-hits you scored'>Auto-hits</span>: " + extrahits + "<br>"
