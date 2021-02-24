@@ -10,4 +10,4 @@ Please download the linked files to use offline.
 - Open the file in your web browser
 
 ## Why does it suck?
-Because I'm not a graphic designer and I don't think jQueryUI is dead yet. Feel free to edit this and send me pull requests. Contanct me if you don't know how.
+Because I'm not a graphic designer and I don't think jQueryUI is dead yet. Feel free to edit this and send me pull requests. Contact me if you don't know how.

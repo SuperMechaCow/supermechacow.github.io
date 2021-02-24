@@ -84,6 +84,15 @@ h3 {
     margin: 5px;
     min-width: 50px;
 }
+
+h1 {
+    margin: 20px auto 0px auto;
+}
+h4 {
+    font-size: 0.6em;
+    padding: 2px;
+    margin: 0px auto 30px auto;
+}
 .ui-accordion-header-active {
     background-color: #333333;
     /* width: 240px; */
@@ -125,3 +134,29 @@ button:focus{
 .ui-helper-hidden-accessible {
     visibility: hidden;
 }
+
+textarea {
+    padding: 5px;
+    text-align: justify;
+    background-color: #ffffe0;
+    resize: none;
+}
+#motdList li {
+    margin-bottom: 20px;
+}
+#attackerName, #defenderName {
+    font-size: 1.2em;
+    font-weight: bolder;
+    padding: 2px;
+    margin: 0px auto 6px auto;
+}
+ #defenderName {
+     margin: 4px auto 2px auto;
+ }
+
+ #weaponsBox {
+     width: 100%;
+     text-align: center;
+     margin: 4px;
+     visibility: hidden;
+ }

@@ -7,13 +7,247 @@ Ideapad:
 - Banner opens menu option or copy/paste
 
 */
-
 var debug = false;
 
 var iterations = 1;
 
+var attackerLoaded = 0;
+
+var units = [{
+	weapons: []
+}, {
+	weapons: []
+}];
+
+$(function() {
+	var lastAccordion = 0;
+	$("#modbox").accordion({
+		active: 6,
+		collapsible: true,
+		heightStyle: 'content',
+		animate: {
+			easing: 'linear',
+			duration: 100,
+		},
+		activate: function(event, ui) {
+			var active = $("#modbox").accordion("option", "active");
+			if (active === false && lastAccordion == 6) {
+				$("#modbox").accordion("option", "active", 6);
+				krunchit();
+			} else if (active === false && lastAccordion == 7) {
+				parseImport();
+				$("#modbox").accordion("option", "active", 7);
+			} else if (active == 7) {
+				if (!attackerLoaded) {
+					document.getElementById('importButton').innerHTML = 'Tap to Import Attacker';
+				} else {
+					document.getElementById('importButton').innerHTML = 'Tap to Import Defender';
+				}
+			} else if (active == 6) {
+				document.getElementById('simulateButton').innerHTML = 'Tap to Simulate';
+			} else if (active === false) {
+				$("#modbox").accordion("option", "active", 6);
+			}
+		},
+		beforeActivate: function(event, ui) {
+			lastAccordion = $("#modbox").accordion("option", "active");
+			if (lastAccordion == 7) {
+				document.getElementById('importButton').innerHTML = 'Import';
+			} else if (lastAccordion == 6) {
+				document.getElementById('simulateButton').innerHTML = 'Simulation';
+			}
+		}
+	});
+	$(document).tooltip({
+		show: {
+			delay: 1500,
+			duration: 500
+		},
+		hide: {
+			delay: 0,
+			duration: 0
+		}
+	});
+});
+
+
+function parseImport() {
+	// ¯\_(ツ)_/¯
+	getBoxes();
+	if (importBox.value) {
+		let copypasta = importBox.value;
+		units[attackerLoaded].weapons = [];
+		copypasta = copypasta.split("\n");
+		let modelGrabber = false;
+		copypasta.forEach((line, i) => {
+			if (line.includes("** M:") && !modelGrabber) {
+				line = line.split("|")
+				units[attackerLoaded]["name"] = line[0].split("**")[1].replace(":", '');
+				line.shift();
+				line.forEach((stat, i) => {
+					if (stat) {
+						stat = stat.split(":");
+						stat[1] = Number(stat[1].replace(/[^0-9.]/, ''));
+						units[attackerLoaded][stat[0]] = stat[1];
+					}
+				});
+				modelGrabber = true;
+			} else if (line.includes("** Range:")) {
+				let weapon = {}
+				line = line.split("|")
+				//GRAB NAME HERE BEFORE SHIFTING IT OUT!
+				weapon["name"] = line[0].split("**")[1].replace(":", '');
+				line.shift();
+				line.forEach((stat, i) => {
+					stat = stat.split(":");
+					if (stat[0] == "Type") {
+						if (stat[1] == "Melee") {
+							weapon['type'] = stat[1];
+							weapon['A'] = units[attackerLoaded]['A'];
+						} else {
+							let typeSplit = stat[1].split(' ');
+							weapon['type'] = typeSplit[0];
+							weapon['A'] = typeSplit[1];
+						}
+					} else if (stat[0] == "S" || stat[0] == "D") {
+						weapon[stat[0]] = stat[1];
+					} else if (stat[0] == "Abilities") {
+						weapon[stat[0]] = abilityLookup(stat[1]);
+					} else if (stat[0] && stat[1]) {
+						stat[1] = Number(stat[1].replace(/[^0-9.]/, ''));
+						weapon[stat[0]] = stat[1];
+					}
+				});
+				units[attackerLoaded].weapons.push(weapon);
+			}
+		});
+		//Validate data here
+		for (stat in units[attackerLoaded]) {
+			switch (stat) {
+				case 'Mdls':
+					//Need to parse from model names
+					// if (!attackerLoaded) {}
+					break;
+				case 'A':
+					attackerA_box.value = units[attackerLoaded]['A'];
+					break;
+				case 'WS':
+					attackerAS_box.value = units[attackerLoaded]['WS'];
+					break;
+				case 'S':
+					attackerS_box.value = units[attackerLoaded]['S'];
+					break;
+				case 'AP':
+					attackerAP_box.value = 0;
+					break;
+				case 'T':
+					defenderT_box.value = units[attackerLoaded]['T'];
+					break;
+				case 'W':
+					defenderW_box.value = units[attackerLoaded]['W'];
+					break;
+				case 'Sv':
+					defenderSv_box.value = units[attackerLoaded]['Sv'];
+					break;
+				case 'name':
+					if (attackerLoaded === 0) {
+						attackerName_box.innerHTML = units[attackerLoaded]["name"];
+					} else {
+						defenderName_box.innerHTML = units[attackerLoaded]["name"];
+					}
+					break;
+				case 'weapons':
+					while (weaponsBox.options.length) weaponsBox.remove(0);
+					units[attackerLoaded]["weapons"].forEach((weapon, i) => {
+						let opt = document.createElement("option")
+						opt.text = weapon['name'];
+						weaponsBox.options.add(opt);
+						weaponsBox.style.visibility = "visible";
+					});
+					break;
+				default:
+					break;
+			}
+		}
+
+
+		importBox.value = '';
+		importBox.placeholder = 'Nom nom nom!\n\nPaste another BattleScribe unit here to import an opponent, or click the Import button again now to switch back to the unit you just imported.'
+	}
+	if (attackerLoaded) attackerLoaded = 0;
+	else attackerLoaded = 1;
+}
+
+function abilityLookup(abilityText) {
+	let abilities = {}
+	if (abilityText.includes('When the bearer fights, it makes 1 additional attack with this weapon.')) {
+		let effect = function() {
+			console.log("I added +1 attack here.");
+			attackerA_box.value++;
+		}
+		abilities["+1A from weapon."] = effect;
+	}
+	return abilities;
+}
+
+function updateWeaponsStatLines(weaponIndex) {
+	getBoxes();
+	for (stat in units[0].weapons[weaponIndex]) {
+		switch (stat) {
+			case 'A':
+				if (units[0].weapons[weaponIndex]['type'] == 'Melee') {
+					attackerA_box.value = units[0].weapons[weaponIndex][stat];
+					attackerAS_box.value = units[0]['WS'];
+					console.log(units[0].weapons[weaponIndex]);
+					if (!units[0].weapons[weaponIndex]['S'] == "User") attackerS_box.value = eval(units[0]['S'] + units[0].weapons[weaponIndex]['S']);
+					else attackerS_box.value = units[0]['S']
+				} else {
+					if (units[0].weapons[weaponIndex][stat].includes('A')) {
+						let temp_stat = units[0].weapons[weaponIndex][stat].split('A');
+						if (!temp_stat[0]) temp_stat[0] = 1;
+						if (units[0].weapons[weaponIndex][stat].includes('+')) {
+							temp_stat.push(temp_stat[1].split('+')[1]);
+						}
+					}
+					attackerA_box.value = units[0].weapons[weaponIndex][stat];
+					attackerAS_box.value = units[0]['BS'];
+					attackerS_box.value = units[0]['S'];
+				}
+				break;
+			case 'AP':
+				attackerAP_box.value = units[0].weapons[weaponIndex][stat];
+				break;
+			case 'D':
+				if (units[0].weapons[weaponIndex][stat].includes('D')) {
+					let temp_stat = units[0].weapons[weaponIndex][stat].split('D');
+					if (!temp_stat[0]) temp_stat[0] = 1;
+					if (units[0].weapons[weaponIndex][stat].includes('+')) {
+						temp_stat[1] = temp_stat[1].split('+')[0];
+						temp_stat.push(temp_stat[1].split('+')[1]);
+					}
+					if (temp_stat[0]) attackerDmulti_box.value = Number(temp_stat[0]);
+					if (temp_stat[1]) attackerDdenom_box.value = Number(temp_stat[1]);
+					if (temp_stat[2]) attackerDmod_box.value = Number(temp_stat[2]);
+				}
+				break;
+			case 'Abilities':
+				let abilTexts = [];
+                for (ability in units[0].weapons[weaponIndex][stat]) {
+                    abilTexts.push(ability);
+                    units[0].weapons[weaponIndex][stat][ability]();
+                }
+                if (abilTexts.length) {
+                    attackerName_box.title = "";
+                    abilTexts.forEach((item, i) => { attackerName_box.title = item + "\n"; });
+                }
+			default:
+				break;
+		}
+	}
+}
+
 function setit(battles) {
-    iterations = battles;
+	iterations = battles;
 }
 
 function roll(multi = 1, denom = 6, mod = 0) {
@@ -31,20 +265,29 @@ function check(result, against, higher = true) {
 
 }
 
+function tickle() {
+	$('#modbox').accordion('option', 'active', false);
+}
+
 function dumpit() {
-  var copystring = document.getElementById("output").innerHTML;
-  copystring = copystring.replace(/<br>/g, '\r\n');
-  copystring = copystring.replace(/<[^>]*>/g, '');
-  var temp = document.createElement("INPUT");
-  temp.value = copystring;
-  document.body.appendChild(temp);
-  temp.select();
-  document.execCommand("copy");
-  temp.remove();
+	getBoxes();
+	var copystring = document.getElementById("output").innerHTML;
+	copystring = copystring.replace(/<br>/g, '\n');
+	copystring = copystring.replace(/<span[^>]*>/g, '> **');
+	copystring = copystring.replace(/<\/span[^>]*>/g, '**');
+	copystring = '# ' + iterations + ' Fight Results\n' + copystring + '[supermechacow.github.io](https://supermechacow.github.io)'
+	var temp = document.createElement("textarea");
+	temp.value = copystring
+	document.body.appendChild(temp);
+	temp.select();
+	document.execCommand("copy");
+	temp.remove();
+	output.innerHTML += `<br>Copied results to clipboard as Markdown.<br>`
 }
 
 function getBoxes() {
-	// Attack/Defend boxes
+	// Attack/Defend values
+	attackerName = document.getElementById('attackerName').innerHTML;
 	attackerModels = Number(document.getElementById('attackerModelsbox').value);
 	attackerA = Number(document.getElementById('attackerAbox').value);
 	attackerAS = Number(document.getElementById('attackerASbox').value);
@@ -54,6 +297,20 @@ function getBoxes() {
 	defenderT = Number(document.getElementById('defenderTbox').value);
 	defenderW = Number(document.getElementById('defenderWbox').value);
 	defenderSv = Number(document.getElementById('defenderSvbox').value);
+	defenderName = document.getElementById('defenderName').innerHTML;
+
+	// Attack/Defend values
+	attackerName_box = document.getElementById('attackerName');
+	attackerModels_box = document.getElementById('attackerModelsbox');
+	attackerA_box = document.getElementById('attackerAbox');
+	attackerAS_box = document.getElementById('attackerASbox');
+	attackerS_box = document.getElementById('attackerSbox');
+	attackerAP_box = document.getElementById('attackerAPbox');
+	defenderModels_box = document.getElementById('defenderModelsbox');
+	defenderT_box = document.getElementById('defenderTbox');
+	defenderW_box = document.getElementById('defenderWbox');
+	defenderSv_box = document.getElementById('defenderSvbox');
+	defenderName_box = document.getElementById('defenderName');
 
 	//Hit Modifiers
 	hitMod = document.getElementById('HitMod').checked;
@@ -92,8 +349,14 @@ function getBoxes() {
 	reanimateagainst = Number(document.getElementById('reanimateagainst').value);
 	// reanimatereroll = Number(document.getElementById('reanimatereroll').value);
 	// reanimatemod = Number(document.getElementById('reanimatemod').value);
+
+	attackerDmulti_box = document.getElementById('attackerDmultibox');
+	attackerDdenom_box = document.getElementById('attackerDdenombox');
+	attackerDmod_box = document.getElementById('attackerDmodbox');
 	//Output box
 	outputBox = document.getElementById('output');
+	importBox = document.getElementById('importBox');
+	weaponsBox = document.getElementById('weaponsBox')
 
 }
 
@@ -148,7 +411,7 @@ function krunchit() {
 			let wounds = 0;
 			let autowounds = 0;
 			// If random attacks are specified in the Hits tab
-			if (randomAttacks) attacks += roll(randomAttacksDice, randomAttacksDenom, randomAttacksMod);
+			if (randomAttacks || attackerA == 0) attacks += roll(randomAttacksDice, randomAttacksDenom, randomAttacksMod);
 			// Otherwise use the A stat
 			else attacks = attackerA;
 			// All flamers hit without rolling
@@ -277,11 +540,13 @@ function krunchit() {
 				if (!attackerDmulti) result = attackerDdenom + attackerDmod;
 				else result = roll(attackerDmulti, attackerDdenom, attackerDmod);
 				// Shielding
-				if (result - flatDR > 1) {
-					result = result - flatDR;
-					shielded -= flatDR - result;
-				} else {
-					result = 1;
+				if (flatDR) {
+					if (result - flatDR > 1) {
+						result = result - flatDR;
+						shielded -= flatDR - result;
+					} else {
+						result = 1;
+					}
 				}
 				// Add to total damage and effective damage
 				damage += result;
@@ -338,28 +603,28 @@ function krunchit() {
 	} //Iterations end
 
 	outputBox.innerHTML = "";
-	if (total_attacksMade) outputBox.innerHTML += "<span class='outputCataR' title='The number of attacks made on the defending unit.'>Attacks</span>: " + total_attacksMade + "<br>"
-	if (total_bonusAttack) outputBox.innerHTML += "<span class='outputCataB' title='The number of extra attacks made on the Hit roll.'>Bonus attacks</span>: " + total_bonusAttack + "<br>"
-	if (total_hits) outputBox.innerHTML += "<span class='outputCataR' title='The number of successful Hit rolls.'>Hits</span>: " + total_hits + "<br>"
-	if (total_hitreroll) outputBox.innerHTML += "<span class='outputCataB' title='The number of Hit rerolls that would have been failures.'>Hit re-rolls</span>: " + total_hitreroll + "<br>"
-	if (total_autohits) outputBox.innerHTML += "<span class='outputCataB' title='How many auto-hits you scored'>Auto-hits</span>: " + total_autohits + "<br>"
-	if (total_wounds + total_apwounds) outputBox.innerHTML += "<span class='outputCataR' title='The number of successful Wound rolls'>Wounds</span>: " + Number(total_wounds + total_apwounds) + "<br>"
-	if (total_apwounds) outputBox.innerHTML += "<span class='outputCataR' title='The number of wounds that had bonus AP from the wound roll.'>Bonus AP</span>: " + Number(total_apwounds) + "<br>"
-	if (total_autowounds) outputBox.innerHTML += "<span class='outputCataB' title='How many auto-wounds you scored'>Auto-wounds</span>: " + total_autowounds + "<br>"
-	if (total_woundreroll) outputBox.innerHTML += "<span class='outputCataB' title='The number of Wound rerolls that would have been failures.'>Wound re-rolls</span>: " + total_woundreroll + "<br>"
-	if (total_ignored) outputBox.innerHTML += "<span class='outputCataB' title='The number of wounds that were ignored that would have been successful.'>Ignored Wounds</span>: " + total_ignored + "<br>"
-	if (total_saves) outputBox.innerHTML += "<span class='outputCataB' title='The number of saves that the defender would have made normally.'>Saves</span>: " + total_saves + "<br>"
-	if (total_invulns) outputBox.innerHTML += "<span class='outputCataB' title='The number of saves that the defender would have made with Invulnerable saves.'>Invulnerable Saves</span>: " + total_invulns + "<br>"
-	if (total_damage) outputBox.innerHTML += "<span class='outputCataR' title='The amount of damage that was rolled for, before considering target Wounds characteristic or mitigation.'>Damage</span>: " + total_damage + "<br>"
-	if (total_unfelt) outputBox.innerHTML += "<span class='outputCataB' title='The amount of damage prevented by Feel No Pain'>Feel No Pains</span>: " + total_unfelt + "<br>"
-	if (total_shielded) outputBox.innerHTML += "<span class='outputCataB' title='The amount of damage prevented by Damage Reduction'>Shielded</span>: " + total_shielded + "<br>"
-	if (total_mortals) outputBox.innerHTML += "<span class='outputCataR' title='The amount of Mortal wounds inflicted on the target.'>Mortal Wounds</span>: " + total_mortals + "<br>"
-	if (total_modelsKilled) outputBox.innerHTML += "<span class='outputCataR' title='The number of models in the defending unit would have killed.'>Models Killed</span>: " + total_modelsKilled + "<br>"
-	if (total_foughtback) outputBox.innerHTML += "<span class='outputCataB' title='The number of models that fought back before dying in the defending unit.'>Fought back</span>: " + total_foughtback + "<br>"
-	if (total_reanimated) outputBox.innerHTML += "<span class='outputCataB' title='The number of models that were brought back by Reanimation Protocol.'>Reanimated</span>: " + total_reanimated + "<br>"
-	if (total_squadwipe) outputBox.innerHTML += "<span class='outputCataR' title='The number of times in this simulation the attacking unit completely destroyed the defneding unit.'>Squads Wiped</span>: " + total_squadwipe + "<br>"
+	if (total_attacksMade) outputBox.innerHTML += "<span class='outputCataR' title='The number of attacks made on the defending unit.'>Attacks</span>: " + total_attacksMade + " (" + Math.round(total_attacksMade / iterations) + ")<br>"
+	if (total_bonusAttack) outputBox.innerHTML += "<span class='outputCataB' title='The number of extra attacks made on the Hit roll.'>Bonus attacks</span>: " + total_bonusAttack + " (" + Math.round(total_bonusAttack / iterations) + ")<br>"
+	if (total_hits) outputBox.innerHTML += "<span class='outputCataR' title='The number of successful Hit rolls.'>Hits</span>: " + total_hits + " (" + Math.round(total_hits / iterations) + ")<br>"
+	if (total_hitreroll) outputBox.innerHTML += "<span class='outputCataB' title='The number of Hit rerolls that would have been failures.'>Hit re-rolls</span>: " + total_hitreroll + " (" + Math.round(total_hitreroll / iterations) + ")<br>"
+	if (total_autohits) outputBox.innerHTML += "<span class='outputCataB' title='How many auto-hits you scored'>Auto-hits</span>: " + total_autohits + " (" + Math.round(total_autohits / iterations) + ")<br>"
+	if (total_wounds + total_apwounds) outputBox.innerHTML += "<span class='outputCataR' title='The number of successful Wound rolls'>Wounds</span>: " + Number(total_wounds + total_apwounds) + " (" + Math.round(Number(total_wounds + total_apwounds) / iterations) + ")<br>"
+	if (total_apwounds) outputBox.innerHTML += "<span class='outputCataR' title='The number of wounds that had bonus AP from the wound roll.'>Bonus AP</span>: " + Number(total_apwounds) + " (" + Math.round(Number(total_apwounds) / iterations) + ")<br>"
+	if (total_autowounds) outputBox.innerHTML += "<span class='outputCataB' title='How many auto-wounds you scored'>Auto-wounds</span>: " + total_autowounds + " (" + Math.round(total_autowounds / iterations) + ")<br>"
+	if (total_woundreroll) outputBox.innerHTML += "<span class='outputCataB' title='The number of Wound rerolls that would have been failures.'>Wound re-rolls</span>: " + total_woundreroll + " (" + Math.round(total_woundreroll / iterations) + ")<br>"
+	if (total_ignored) outputBox.innerHTML += "<span class='outputCataB' title='The number of wounds that were ignored that would have been successful.'>Ignored Wounds</span>: " + total_ignored + " (" + Math.round(total_ignored / iterations) + ")<br>"
+	if (total_saves) outputBox.innerHTML += "<span class='outputCataB' title='The number of saves that the defender would have made normally.'>Saves</span>: " + total_saves + " (" + Math.round(total_saves / iterations) + ")<br>"
+	if (total_invulns) outputBox.innerHTML += "<span class='outputCataB' title='The number of saves that the defender would have made with Invulnerable saves.'>Invulnerable Saves</span>: " + total_invulns + " (" + Math.round(total_invulns / iterations) + ")<br>"
+	if (total_damage) outputBox.innerHTML += "<span class='outputCataR' title='The amount of damage that was rolled for, before considering target Wounds characteristic or mitigation.'>Damage</span>: " + total_damage + " (" + Math.round(total_damage / iterations) + ")<br>"
+	if (total_unfelt) outputBox.innerHTML += "<span class='outputCataB' title='The amount of damage prevented by Feel No Pain'>Feel No Pains</span>: " + total_unfelt + " (" + Math.round(total_unfelt / iterations) + ")<br>"
+	if (total_shielded) outputBox.innerHTML += "<span class='outputCataB' title='The amount of damage prevented by Damage Reduction'>Shielded</span>: " + total_shielded + " (" + Math.round(total_shielded / iterations) + ")<br>"
+	if (total_mortals) outputBox.innerHTML += "<span class='outputCataR' title='The amount of Mortal wounds inflicted on the target.'>Mortal Wounds</span>: " + total_mortals + " (" + Math.round(total_mortals / iterations) + ")<br>"
+	if (total_modelsKilled) outputBox.innerHTML += "<span class='outputCataR' title='The number of models in the defending unit would have killed.'>Models Killed</span>: " + total_modelsKilled + " (" + Math.round(total_modelsKilled / iterations) + ")<br>"
+	if (total_foughtback) outputBox.innerHTML += "<span class='outputCataB' title='The number of models that fought back before dying in the defending unit.'>Fought back</span>: " + total_foughtback + " (" + Math.round(total_foughtback / iterations) + ")<br>"
+	if (total_reanimated) outputBox.innerHTML += "<span class='outputCataB' title='The number of models that were brought back by Reanimation Protocol.'>Reanimated</span>: " + total_reanimated + " (" + Math.round(total_reanimated / iterations) + ")<br>"
+	if (total_squadwipe) outputBox.innerHTML += "<span class='outputCataR' title='The number of times in this simulation the attacking unit completely destroyed the defneding unit.'>Squads Wiped</span>: " + total_squadwipe + " (" + Math.round(total_squadwipe / iterations) + ")<br>"
 	outputBox.innerHTML += "<span class='outputCataR' title='The amount of damage you actually inflicted (excess damage not needed to kill a model is ignored, along with shields and abilities)'>Effective Damage</span>: " + total_effdamage +
-		"<br>"
-	outputBox.innerHTML += "<span class='outputCataG' title='Effective Damage Per Attack: How much damage each models attack would have done'>EDPA</span>: " + Number(total_effdamage / (attackerModels * iterations * attackerA)) + "<br>"
+		" (" + Math.round(total_effdamage / iterations) + ")<br>"
+	outputBox.innerHTML += "<span class='outputCataG' title='Effective Damage Per Attack: How much damage each models attack would have done'>EDPA</span>: " + Number(total_effdamage / (total_attacksMade)) + "<br>"
 	outputBox.innerHTML += "<span class='outputCataG' title='Effective Damage Per Unit: How much damage the whole units attack would have done'>EDPU</span>: " + Number(total_effdamage / iterations) + "<br>"
 }

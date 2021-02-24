@@ -4,53 +4,28 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>40kRoller</title>
+    <title>40kroller</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Jura">
     <link rel="stylesheet" href="40kroller.css">
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-    <script>
-        var lastAccordion = 0;
-        $( function() {
-          $( "#modbox" ).accordion({
-              active: 6,
-              collapsible: true,
-              heightStyle: 'content',
-              animate: {
-                easing: 'linear',
-                duration: 100
-            },
-            activate: function (event, ui) {
-                var active = $( "#modbox" ).accordion( "option", "active" );
-                if (active === false && lastAccordion == 6) {
-                    $( "#modbox" ).accordion( "option", "active", 6 );
-                } else if (active == 7) {
-                    $( "#modbox" ).accordion( "option", "active", 6 );
-                } else {
-                    lastAccordion = active;
-                }
-            }
-          });
-          $( document ).tooltip({
-              show: {
-                  delay: 1500,
-                  duration: 500
-              }
-          });
-        });
-    </script>
+    <script type="text/javascript" src="40kroller.js" defer></script>
 </head>
 
 <body>
-    <h1 id="banner" align="center">40kroller</h1>
+
+    <h1 id="banner" title="This is the name of this webapp." align="center" onclick="tickle()">40kroller</h1>
+    <h4 align="center">The 40k Game Simulator Game</h4>
     <div id="content">
 
         <!-- Attacker -->
 
-        <!-- <h2>Attacker's Stats</h2> -->
         <div id="modbox">
-            <h3 title="Stats of the attacking and defending units." style="width: 100%;">Statlines</h3>
+            <h3 style="width: 100%;">Statlines</h3>
             <div class="mods">
+                <div id="attacker">
+                    <h2 id="attackerName" title="Abilities will show here if they are detected.">Attacker's Stats</h2>
+                </div>
                 <div id="attacker">
                     <div class="statBoxAttacker" id="attackerModels" title="The number of models in the attacking unit.">
                         <label for="attackerModelsbox">Mdls</label><br>
@@ -73,11 +48,13 @@
                         <input type="number" name="attackerAPbox" id="attackerAPbox" size=1 value=1>
                     </div>
                 </div>
-
-                <!-- Defender -->
-                <!-- <h2>Defender's Stats</h2> -->
                 <div id="defender">
-                    <div class="statBoxDefender" id="defenderModels" title="The number of models in the defending unit.">
+                    <select id="weaponsBox" name="weaponsBox" onchange="updateWeaponsStatLines(this.selectedIndex)">
+                    </select>
+                </div>
+                <!-- Defender -->
+                <div id="defender">
+                    <div class="statBoxDefender" id="defenderModels">
                         <label for="defenderModelsbox">Mdls</label><br>
                         <input type="number" name="defenderModelsbox" id="defenderModelsbox" size=2 value=10>
                     </div>
@@ -94,10 +71,13 @@
                         <input type="number" name="defenderSvbox" id="defenderSvbox" size=1 value=3>
                     </div>
                 </div>
+                <div id="defender">
+                    <h2 id="defenderName">Defender's Stats</h2>
+                </div>
             </div>
             <!-- Hit Mods -->
 
-            <h3 title="Hit roll modifiers">Hit</h3>
+            <h3>Hit</h3>
             <div class="mods">
                 <div class="mod" title="Add this to the die roll.">
                     <label for="HitMod">Modifier </label>
@@ -105,8 +85,8 @@
                 </div>
                 <div class="mod" title="Roll xDy+z attacks for each model instead of the flat Attack characteristic.">
                     <input type="checkbox" id="randomAttacks"> Random number of attacks:<br>
-                    <input type="number" name="randomAttacksDice" id="randomAttacksDice" size=1 value=1>D
-                    <input type="number" name="randomAttacksDenom" id="randomAttacksDenom" size=1 value=6>+
+                    <input type="number" name="randomAttacksDice" id="randomAttacksDice" size=1 value=1> D
+                    <input type="number" name="randomAttacksDenom" id="randomAttacksDenom" size=1 value=6> +
                     <input type="number" name="randomAttacksMod" id="randomAttacksMod" size=1 value=0>
                 </div>
                 <div class="mod" title="These attacks always hit. Do not roll.">
@@ -129,7 +109,7 @@
 
             <!-- Wound mods -->
 
-            <h3 title="Wound roll modifiers">Wound</h3>
+            <h3>Wound</h3>
             <div class="mods">
                 <div class="mod" title="Add this to the die roll.">
                     <label for="WMod">Modifier </label>
@@ -154,7 +134,7 @@
 
             <!-- Save Mods -->
 
-            <h3 title="Save roll modifiers">Save</h3>
+            <h3>Save</h3>
             <div class="mods">
                 <div class="mod" title="Add this to the die roll.">
                     <label for="SvMod">Modifier </label>
@@ -172,7 +152,7 @@
 
             <!-- Damage mods -->
 
-            <h3 title="Damage roll modifiers">Damage</h3>
+            <h3>Damage</h3>
             <div class="mods">
 
                 <div class="mod" title="How many dice do you roll for damage? If 0, then it will always be the Max Damage below.">
@@ -207,38 +187,42 @@
             </div>
 
             <!-- Buttons -->
-            <h3 title="" style="width: 100%;">Setup</h3>
+            <h3 style="width: 100%;">Setup</h3>
 
             <div class="mods" style="display: flex; flex-wrap: wrap; justify-content: center;">
-                <button type="button" name="button" onclick="setit(1);krunchit();$( '#modbox' ).accordion( 'option', 'active', 6 );" title="Simulate 1 time.">One Fight</button>
-                <button type="button" name="button" onclick="setit(100);krunchit();$( '#modbox' ).accordion( 'option', 'active', 6 );" title="Simulate 100 times.">100 Fights</button>
-                <button type="button" name="button" onclick="setit(10000);krunchit();$( '#modbox' ).accordion( 'option', 'active', 6 );" title="Simulate 10000 times.">10,000 Fights</button>
+                <button type="button" name="button" onclick="setit(1);" title="Simulate 1 time.">One Fight</button>
+                <button type="button" name="button" onclick="setit(100);;" title="Simulate 100 times.">100 Fights</button>
+                <button type="button" name="button" onclick="setit(10000);" title="Simulate 10000 times.">10,000 Fights</button>
             </div>
-            <h3 title="Hit roll modifiers" style="width: 100%;" onclick="krunchit();">Outpoot</h3>
+            <h3 style="width: 100%;" id="simulateButton">Tap to Simulate</h3>
             <div id="output">
                 <p>
-                    40kroller is a tiny, lightweight attack simulator for Warhammer40k.
+                    <span class='outputCataB' title='This simulator'>40kroller</span> is a tiny, lightweight attack simulator for Warhammer40k.
                 </p>
                 <b>How to use:</b>
-                <ol>
-                    <li>Put the attacker's statline in the top boxes.</li>
-                    <li>Put the defender's statline in the bottom boxes.</li>
-                    <li>Select all of the modifiers for your attacks an defenses in the "Hit", "Wound", "Save", and "Damage" tabs.</li>
-                    <li>Use the buttons to roll 1, 1000, or 10000 simulations of this setup.</li>
-                    <li>The results will appear in this box.</li>
-                    <li>Hover over boxes, tabs, and results with your mouse to get additional info.</li>
-                </ol>
-                <p>You can get this code for free at: <a href="https://github.com/SuperMechaCow/supermechacow.github.io">https://github.com/SuperMechaCow/supermechacow.github.io</a></p>
+                <ul id="motdList">
+                    <li><span style="font-size: 1.3em;"><span class="outputCataG" title="By this I mean click everything on the page!">Touch</span> the <span class="outputCataB" title="Black boxes containing text are buttons, but input boxes and colored text work, too.">everything</span>!</span></li>
+                    <li>If something <span class="outputCataR" title="Feel free to leave issues on the github page!">breaks</span>, don"t panic! Just <span class="outputCataB" title="Have you tried turning it off and back on again?">refresh</span>
+                        the page.</li>
+                    <li><span class="outputCataG" title="Put your mouse cursor over it and do not move.">Hover-over</span> or <span class="outputCataG" title="Poke with your finger and wait, if you're on mobile.">Tap-and-wait</span> on things, and a
+                        <span class="outputCataB" title="If you're reading this, you're doing it correctly!">tooltip</span> will arrive in 2 seconds. It will tell you secrets!.</li>
+                    <li><span class="outputCataG" title="PC Master Race!">Click</span> or <span class="outputCataG" title="... but this page was designed specifically for mobile use.">tap</span> in a blank space to make tooltips go away.</li>
+                </ul>
+                <p>You can get this code for free at: <a href="https://github.com/SuperMechaCow/supermechacow.github.io">https://github.com/SuperMechaCow/<br>supermechacow.github.io</a></p>
                 <p>Feel free to host, contribute, and share!</p>
             </div>
-            <h3 title="Copy to clipboard to show your buddies on discord and reddit :)" onclick="dumpit();">Copy to Clipboard</h3>
-
+            <h3 id="importButton" title="Paste a unit into 40kroller from Battlescribe">Import</h3>
+            <div class="">
+                <textarea name="importBox" id="importBox" rows="8" cols="38" placeholder="In Battlescribe, View a unit, switch the view type to 'Markdown', and copy/paste into this box. Then hit 'Import' again."></textarea>
+            </div>
+            <h3>Export</h3>
+            <div class="mods" style="display: flex; flex-wrap: wrap; justify-content: center;">
+                <button type="button" name="button" onclick="dumpit();" title="Export Markdown to show all of your friends on discord and reddit :)">Markdown</button>
+            </div>
 
         </div>
     </div>
-    <script type="text/javascript" src="40kroller.js">
 
-    </script>
 </body>
 
 </html>
