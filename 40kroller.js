@@ -402,6 +402,8 @@ function krunchit() {
 	let total_foughtback = 0;
 	let total_reanimated = 0;
 
+	let modelHP = defenderW;
+
 	//
 	// Simulations
 	//
@@ -547,10 +549,9 @@ function krunchit() {
 			let damage = 0;
 			let effdamage = 0;
 			let unfelt = 0;
-			let modelHP = defenderW;
+			let modelsKilled = 0;
 			let squadwipe = 0;
 			let foughtback = 0;
-			let modelsKilled = 0;
 			for (let unsaved_i = 0; unsaved_i < wounds - saves; unsaved_i++) {
 				let result;
 				// If there's a random amount of Damage
@@ -577,7 +578,7 @@ function krunchit() {
 						// Hurt the model
 						modelHP--;
 						// If the model is dead
-						if (modelHP == 0) {
+						if (modelHP <= 0) {
 							modelsKilled++;
 							// Can they fight back on death?
 							if (fightback) foughtback += check(roll(), fightbackagainst);
