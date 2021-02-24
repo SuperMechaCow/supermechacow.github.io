@@ -11,7 +11,7 @@ var debug = false;
 
 var iterations = 1;
 
-var attackerLoaded = 0;
+var activeUnit = 0;
 
 var units = [{
 	weapons: []
@@ -38,7 +38,7 @@ $(function() {
 				parseImport();
 				$("#modbox").accordion("option", "active", 7);
 			} else if (active == 7) {
-				if (!attackerLoaded) {
+				if (!activeUnit) {
 					document.getElementById('importButton').innerHTML = 'Tap to Import Attacker';
 				} else {
 					document.getElementById('importButton').innerHTML = 'Tap to Import Defender';
@@ -76,19 +76,19 @@ function parseImport() {
 	getBoxes();
 	if (importBox.value) {
 		let copypasta = importBox.value;
-		units[attackerLoaded].weapons = [];
+		units[activeUnit].weapons = [];
 		copypasta = copypasta.split("\n");
 		let modelGrabber = false;
 		copypasta.forEach((line, i) => {
 			if (line.includes("** M:") && !modelGrabber) {
 				line = line.split("|")
-				units[attackerLoaded]["name"] = line[0].split("**")[1].replace(":", '');
+				units[activeUnit]["name"] = line[0].split("**")[1].replace(":", '');
 				line.shift();
 				line.forEach((stat, i) => {
 					if (stat) {
 						stat = stat.split(":");
 						stat[1] = Number(stat[1].replace(/[^0-9.]/, ''));
-						units[attackerLoaded][stat[0]] = stat[1];
+						units[activeUnit][stat[0]] = stat[1];
 					}
 				});
 				modelGrabber = true;
@@ -103,7 +103,7 @@ function parseImport() {
 					if (stat[0] == "Type") {
 						if (stat[1] == "Melee") {
 							weapon['type'] = stat[1];
-							weapon['A'] = units[attackerLoaded]['A'];
+							weapon['A'] = units[activeUnit]['A'];
 						} else {
 							let typeSplit = stat[1].split(' ');
 							weapon['type'] = typeSplit[0];
@@ -118,47 +118,47 @@ function parseImport() {
 						weapon[stat[0]] = stat[1];
 					}
 				});
-				units[attackerLoaded].weapons.push(weapon);
+				units[activeUnit].weapons.push(weapon);
 			}
 		});
 		//Validate data here
-		for (stat in units[attackerLoaded]) {
+		for (stat in units[activeUnit]) {
 			switch (stat) {
 				case 'Mdls':
 					//Need to parse from model names
-					// if (!attackerLoaded) {}
+					// if (!activeUnit) {}
 					break;
 				case 'A':
-					attackerA_box.value = units[attackerLoaded]['A'];
+					attackerA_box.value = units[activeUnit]['A'];
 					break;
 				case 'WS':
-					attackerAS_box.value = units[attackerLoaded]['WS'];
+					attackerAS_box.value = units[activeUnit]['WS'];
 					break;
 				case 'S':
-					attackerS_box.value = units[attackerLoaded]['S'];
+					attackerS_box.value = units[activeUnit]['S'];
 					break;
 				case 'AP':
 					attackerAP_box.value = 0;
 					break;
 				case 'T':
-					defenderT_box.value = units[attackerLoaded]['T'];
+					defenderT_box.value = units[activeUnit]['T'];
 					break;
 				case 'W':
-					defenderW_box.value = units[attackerLoaded]['W'];
+					defenderW_box.value = units[activeUnit]['W'];
 					break;
 				case 'Sv':
-					defenderSv_box.value = units[attackerLoaded]['Sv'];
+					defenderSv_box.value = units[activeUnit]['Sv'];
 					break;
 				case 'name':
-					if (attackerLoaded === 0) {
-						attackerName_box.innerHTML = units[attackerLoaded]["name"];
+					if (activeUnit === 0) {
+						attackerName_box.innerHTML = units[activeUnit]["name"];
 					} else {
-						defenderName_box.innerHTML = units[attackerLoaded]["name"];
+						defenderName_box.innerHTML = units[activeUnit]["name"];
 					}
 					break;
 				case 'weapons':
 					while (weaponsBox.options.length) weaponsBox.remove(0);
-					units[attackerLoaded]["weapons"].forEach((weapon, i) => {
+					units[activeUnit]["weapons"].forEach((weapon, i) => {
 						let opt = document.createElement("option")
 						opt.text = weapon['name'];
 						weaponsBox.options.add(opt);
@@ -169,23 +169,26 @@ function parseImport() {
 					break;
 			}
 		}
-
-
+		updateWeaponsStatLines(0);
 		importBox.value = '';
 		importBox.placeholder = 'Nom nom nom!\n\nPaste another BattleScribe unit here to import an opponent, or click the Import button again now to switch back to the unit you just imported.'
 	}
-	if (attackerLoaded) attackerLoaded = 0;
-	else attackerLoaded = 1;
+	if (activeUnit) activeUnit = 0;
+	else activeUnit = 1;
 }
 
 function abilityLookup(abilityText) {
 	let abilities = {}
 	if (abilityText.includes('When the bearer fights, it makes 1 additional attack with this weapon.')) {
 		let effect = function() {
-			console.log("I added +1 attack here.");
 			attackerA_box.value++;
 		}
-		abilities["+1A from weapon."] = effect;
+		abilities["+1 A from weapon."] = effect;
+	} else if (abilityText.includes('Blast.')) {
+		let effect = function() {
+			//Blast effects here
+		}
+		abilities["Blast."] = effect;
 	}
 	return abilities;
 }
@@ -198,18 +201,22 @@ function updateWeaponsStatLines(weaponIndex) {
 				if (units[0].weapons[weaponIndex]['type'] == 'Melee') {
 					attackerA_box.value = units[0].weapons[weaponIndex][stat];
 					attackerAS_box.value = units[0]['WS'];
-					console.log(units[0].weapons[weaponIndex]);
 					if (!units[0].weapons[weaponIndex]['S'] == "User") attackerS_box.value = eval(units[0]['S'] + units[0].weapons[weaponIndex]['S']);
 					else attackerS_box.value = units[0]['S']
 				} else {
-					if (units[0].weapons[weaponIndex][stat].includes('A')) {
-						let temp_stat = units[0].weapons[weaponIndex][stat].split('A');
+					if (units[0].weapons[weaponIndex][stat].includes('D')) {
+						let temp_stat = units[0].weapons[weaponIndex][stat].split('D');
 						if (!temp_stat[0]) temp_stat[0] = 1;
 						if (units[0].weapons[weaponIndex][stat].includes('+')) {
 							temp_stat.push(temp_stat[1].split('+')[1]);
 						}
+						if (temp_stat[0]) randomAttacksDice_box.value = Number(temp_stat[0]);
+						if (temp_stat[1]) randomAttacksDenom_box.value = Number(temp_stat[1]);
+						if (temp_stat[2]) randomAttacksMod_box.value = Number(temp_stat[2]);
+						attackerA_box.value = 0;
+					} else {
+						attackerA_box.value = units[0]['A'];
 					}
-					attackerA_box.value = units[0].weapons[weaponIndex][stat];
 					attackerAS_box.value = units[0]['BS'];
 					attackerS_box.value = units[0]['S'];
 				}
@@ -228,18 +235,24 @@ function updateWeaponsStatLines(weaponIndex) {
 					if (temp_stat[0]) attackerDmulti_box.value = Number(temp_stat[0]);
 					if (temp_stat[1]) attackerDdenom_box.value = Number(temp_stat[1]);
 					if (temp_stat[2]) attackerDmod_box.value = Number(temp_stat[2]);
+				} else {
+					attackerDmulti_box.value = 0;
+					attackerDdenom_box.value = units[0].weapons[weaponIndex][stat];
+					attackerDmod_box.value = 0;
 				}
 				break;
 			case 'Abilities':
 				let abilTexts = [];
-                for (ability in units[0].weapons[weaponIndex][stat]) {
-                    abilTexts.push(ability);
-                    units[0].weapons[weaponIndex][stat][ability]();
-                }
-                if (abilTexts.length) {
-                    attackerName_box.title = "";
-                    abilTexts.forEach((item, i) => { attackerName_box.title = item + "\n"; });
-                }
+				for (ability in units[0].weapons[weaponIndex][stat]) {
+					abilTexts.push(ability);
+					units[0].weapons[weaponIndex][stat][ability]();
+				}
+				if (abilTexts.length) {
+					attackerName_box.title = "";
+					abilTexts.forEach((item, i) => {
+						attackerName_box.title = item + "\n";
+					});
+				}
 			default:
 				break;
 		}
@@ -353,6 +366,10 @@ function getBoxes() {
 	attackerDmulti_box = document.getElementById('attackerDmultibox');
 	attackerDdenom_box = document.getElementById('attackerDdenombox');
 	attackerDmod_box = document.getElementById('attackerDmodbox');
+	randomAttacks_box = document.getElementById('randomAttacks').checked;
+	randomAttacksDice_box = document.getElementById('randomAttacksDice');
+	randomAttacksDenom_box = document.getElementById('randomAttacksDenom');
+	randomAttacksMod_box = document.getElementById('randomAttacksMod');
 	//Output box
 	outputBox = document.getElementById('output');
 	importBox = document.getElementById('importBox');
