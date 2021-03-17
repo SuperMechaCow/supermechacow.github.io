@@ -2,227 +2,825 @@
 <html lang="en" dir="ltr">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>40kroller</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Jura">
-    <link rel="stylesheet" href="40kroller.css">
-    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-    <script type="text/javascript" src="40kroller.js" defer></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Jura">
+  <link rel="stylesheet" href="40krusher.css">
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script src="interface.js" charset="utf-8" defer></script>
+  <script src="dataparse.js" charset="utf-8" defer></script>
+  <script src="simulate.js" charset="utf-8" defer></script>
 </head>
 
-<body>
+<body onload="importFromQuery()">
+  <div id="leftSidenav" class="sidenav">
+  </div>
+  <div id="rightSidenav" class="sidenav">
+  </div>
 
-    <h1 id="banner" title="This is the name of this webapp." align="center" onclick="tickle()">40kroller</h1>
-    <h4 align="center">The 40k Game Simulator Game</h4>
-    <div id="content">
+  <span id="lopenNav" class="openNav" onclick="populateNav('leftSidenav');openNav('leftSidenav')">&#9776;</span>
+  <span id="ropenNav" class="openNav" onclick="populateNav('rightSidenav');openNav('rightSidenav')">&#9776;</span>
 
-        <!-- Attacker -->
+  <h1 id="banner" title="This is the name of this webapp." align="center" onclick="tickle()">40kroller</h1>
+  <h4 align="center">The 40k Game Simulator Game</h4>
 
-        <div id="modbox">
-            <h3 style="width: 100%;">Statlines</h3>
-            <div class="mods">
-                <div id="attacker">
-                    <h2 id="attackerName" title="Abilities will show here if they are detected.">Attacker's Stats</h2>
-                </div>
-                <div id="attacker">
-                    <div class="statBoxAttacker" id="attackerModels" title="The number of models in the attacking unit.">
-                        <label for="attackerModelsbox">Mdls</label><br>
-                        <input type="number" name="attackerModelsbox" id="attackerModelsbox" size=2 value=10>
-                    </div>
-                    <div class="statBoxAttacker" id="attackerA" title="The number of attacks each model can make. [For random attacks, see 'Hit Modifiers' tab]">
-                        <label for="attackerAbox">A</label><br>
-                        <input type="number" name="attackerAbox" id="attackerAbox" size=1 value=1>
-                    </div>
-                    <div class="statBoxAttacker" id="attackerAS" title="The WS or BS of the attack (Attack Skill).">
-                        <label for="attackerASbox">AS</label><br>
-                        <input type="number" name="attackerASbox" id="attackerASbox" size=1 value=3>
-                    </div>
-                    <div class="statBoxAttacker" id="attackerS" title="The Strength of the model OR weapon used.">
-                        <label for="attackerSbox">S</label><br>
-                        <input type="number" name="attackerSbox" id="attackerSbox" size=1 value=4>
-                    </div>
-                    <div class="statBoxAttacker" id="attackerAP" title="The AP (no \'-\' symbol!) of the weapon used.">
-                        <label for="attackerAPbox">AP</label><br>
-                        <input type="number" name="attackerAPbox" id="attackerAPbox" size=1 value=1>
-                    </div>
-                </div>
-                <div id="defender">
-                    <select id="weaponsBox" name="weaponsBox" onchange="updateWeaponsStatLines(this.selectedIndex)">
-                    </select>
-                </div>
-                <!-- Defender -->
-                <div id="defender">
-                    <div class="statBoxDefender" id="defenderModels">
-                        <label for="defenderModelsbox">Mdls</label><br>
-                        <input type="number" name="defenderModelsbox" id="defenderModelsbox" size=2 value=10>
-                    </div>
-                    <div class="statBoxDefender" id="defenderT" title="The toughness of models in the defending unit.">
-                        <label for="defenderTbox">T</label><br>
-                        <input type="number" name="defenderTbox" id="defenderTbox" size=1 value=4>
-                    </div>
-                    <div class="statBoxDefender" id="defenderW" title="The number of Wounds each model in the defending unit has.">
-                        <label for="defenderWbox">W</label><br>
-                        <input type="number" name="defenderWbox" id="defenderWbox" size=2 value=1>
-                    </div>
-                    <div class="statBoxDefender" id="defenderSv" title="The Save characteristic of the models in the defending unit.">
-                        <label for="defenderSvbox">Sv</label><br>
-                        <input type="number" name="defenderSvbox" id="defenderSvbox" size=1 value=3>
-                    </div>
-                </div>
-                <div id="defender">
-                    <h2 id="defenderName">Defender's Stats</h2>
-                </div>
-            </div>
-            <!-- Hit Mods -->
+  <!-- Attacker -->
 
-            <h3>Hit</h3>
-            <div class="mods">
-                <div class="mod" title="Add this to the die roll.">
-                    <label for="HitMod">Modifier </label>
-                    <input type="number" name="HitMod" id="HitMod" size=1 value=0>
-                </div>
-                <div class="mod" title="Roll xDy+z attacks for each model instead of the flat Attack characteristic.">
-                    <input type="checkbox" id="randomAttacks"> Random number of attacks:<br>
-                    <input type="number" name="randomAttacksDice" id="randomAttacksDice" size=1 value=1> D
-                    <input type="number" name="randomAttacksDenom" id="randomAttacksDenom" size=1 value=6> +
-                    <input type="number" name="randomAttacksMod" id="randomAttacksMod" size=1 value=0>
-                </div>
-                <div class="mod" title="These attacks always hit. Do not roll.">
-                    <input type="checkbox" id="flamer"> Auto-hit without rolling
-                </div>
-                <div class="mod" title="Reroll the hit roll if it's lower than this number.">
-                    <input type="checkbox" id="rerollhit"> Re-roll
-                    <input type="number" name="rerollHITagainst" id="rerollHITagainst" size=1 value=1> or less
-                </div>
-                <div class="mod" title="Attack again if you roll a 6">
-                    <input type="checkbox" id="explode6"> Bonus Attack on 6's
-                </div>
-                <div class="mod" title="This hit always hits on a 6">
-                    <input type="checkbox" id="extrahit6"> Auto-hit on 6's
-                </div>
-                <div class="mod" title="This hit automatically hits and wounds on a 6">
-                    <input type="checkbox" id="autowound6"> Auto-wound on 6's
-                </div>
-            </div>
-
-            <!-- Wound mods -->
-
-            <h3>Wound</h3>
-            <div class="mods">
-                <div class="mod" title="Add this to the die roll.">
-                    <label for="WMod">Modifier </label>
-                    <input type="number" name="WMod" id="WMod" size=1 value=0>
-                </div>
-                <div class="mod" title="Reroll the wound roll if it\'s lower than this number.">
-                    <input type="checkbox" id="rerollwound"> Re-roll
-                    <input type="number" name="rerollWDagainst" id="rerollWDagainst" size=1 value=1> or less
-                </div>
-                <div class="mod" title="Inflict a Mortal Wound on a roll of 6">
-                    <input type="checkbox" id="mwo6"> Mortals on 6's
-                </div>
-                <div class="mod" title="Hit with additional AP on a 6">
-                    <input type="checkbox" id="apo6"> Bonus AP on 6's
-                    <input type="number" name="apo6amount" id="apo6amount" size=1 value=3>
-                </div>
-                <div class="mod" title="Ignore all wound rolls at or below this number (like Transhuman Physiology)">
-                    Ignore rolls below
-                    <input type="number" name="ignorebelowamount" id="ignorebelowamount" size=1 value=0>
-                </div>
-            </div>
-
-            <!-- Save Mods -->
-
-            <h3>Save</h3>
-            <div class="mods">
-                <div class="mod" title="Add this to the die roll.">
-                    <label for="SvMod">Modifier </label>
-                    <input type="number" name="SvMod" id="SvMod" size=1 value=0>
-                </div>
-                <div class="mod" title="Defender as an Invulnerable save.">
-                    <input type="checkbox" id="defenderInvChecked"> Invulnerable Save
-                    <input type="number" name="defenderInvbox" id="defenderInvbox" size=1 value=7>
-                </div>
-                <div class="mod" title="Roll a D6 for each point of damage. If it's higher than this number remove that point of damage.">
-                    <input type="checkbox" id="defenderFNPChecked"> Feel No Pain
-                    <input type="number" name="defenderFNPbox" id="defenderFNPbox" size=1 value=7>
-                </div>
-            </div>
-
-            <!-- Damage mods -->
-
-            <h3>Damage</h3>
-            <div class="mods">
-
-                <div class="mod" title="How many dice do you roll for damage? If 0, then it will always be the Max Damage below.">
-                    <label for="attackerDmultibox">Dice</label>
-                    <input type="number" name="attackerDmultibox" id="attackerDmultibox" size=1 value=0> (0 for flat damage)
-                </div>
-
-                <div class="mod" title="The flat damage (if 0 dice are used) or the maximum sides the damage dice can have.">
-                    <label for="attackerDdenombox">Max Damage</label>
-                    <input type="number" name="attackerDdenombox" id="attackerDdenombox" size=1 value=1>
-                </div>
-
-                <div class="mod" title="Add this to the damage roll">
-                    <label for="attackerDmodbox">Modifier</label>
-                    <input type="number" name="attackerDmodbox" id="attackerDmodbox" size=1 value=0>
-                </div>
-                <div class="mod" title="Reduce damage by this much, to a minimum of 1. (Serpent Shield or Disgustingly Resilient)">
-                    <label for="flatDRbox">Shield Reduction</label>
-                    <input type="number" name="flatDRbox" id="flatDRbox" size=1 value=0>
-                </div>
-                <div class="mod" title="Model can fight back if killed if they roll this number or higher on a D6.">
-                    <input type="checkbox" id="fightback"> Fight on death on
-                    <input type="number" name="fightbackagainst" id="fightbackagainst" size=1 value=4>+
-                </div>
-                <div class="mod" title="When defending models die, attempt to use Reanimation Protocols.">
-                    <input type="checkbox" id="reanimate"> Reanimate on
-                    <input type="number" name="reanimateagainst" id="reanimateagainst" size=1 value=5>+
-                    <!-- re-rolling <input type="number" name="reanimatereroll" id="reanimatereroll" size=1 value=1> or lower -->
-                    <!-- adding <input type="number" name="reanimatemod" id="reanimatemod" size=1 value=1> to roll. -->
-
-                </div>
-            </div>
-
-            <!-- Buttons -->
-            <h3 style="width: 100%;">Setup</h3>
-
-            <div class="mods" style="display: flex; flex-wrap: wrap; justify-content: center;">
-                <button type="button" name="button" onclick="setit(1);" title="Simulate 1 time.">One Fight</button>
-                <button type="button" name="button" onclick="setit(100);;" title="Simulate 100 times.">100 Fights</button>
-                <button type="button" name="button" onclick="setit(10000);" title="Simulate 10000 times.">10,000 Fights</button>
-            </div>
-            <h3 style="width: 100%;" id="simulateButton">Tap to Simulate</h3>
-            <div id="output">
-                <p>
-                    <span class='outputCataB' title='This simulator'>40kroller</span> is a tiny, lightweight attack simulator for Warhammer40k.
-                </p>
-                <b>How to use:</b>
-                <ul id="motdList">
-                    <li><span style="font-size: 1.3em;"><span class="outputCataG" title="By this I mean click everything on the page!">Touch</span> the <span class="outputCataB" title="Black boxes containing text are buttons, but input boxes and colored text work, too.">everything</span>!</span></li>
-                    <li>If something <span class="outputCataR" title="Feel free to leave issues on the github page!">breaks</span>, don"t panic! Just <span class="outputCataB" title="Have you tried turning it off and back on again?">refresh</span>
-                        the page.</li>
-                    <li><span class="outputCataG" title="Put your mouse cursor over it and do not move.">Hover-over</span> or <span class="outputCataG" title="Poke with your finger and wait, if you're on mobile.">Tap-and-wait</span> on things, and a
-                        <span class="outputCataB" title="If you're reading this, you're doing it correctly!">tooltip</span> will arrive in 2 seconds. It will tell you secrets!.</li>
-                    <li><span class="outputCataG" title="PC Master Race!">Click</span> or <span class="outputCataG" title="... but this page was designed specifically for mobile use.">tap</span> in a blank space to make tooltips go away.</li>
-                </ul>
-                <p>You can get this code for free at: <a href="https://github.com/SuperMechaCow/supermechacow.github.io">https://github.com/SuperMechaCow/<br>supermechacow.github.io</a></p>
-                <p>Feel free to host, contribute, and share!</p>
-            </div>
-            <h3 id="importButton" title="Paste a unit into 40kroller from Battlescribe">Import</h3>
-            <div class="">
-                <textarea name="importBox" id="importBox" rows="8" cols="38" placeholder="In Battlescribe, View a unit, switch the view type to 'Markdown', and copy/paste into this box. Then hit 'Import' again."></textarea>
-            </div>
-            <h3>Export</h3>
-            <div class="mods" style="display: flex; flex-wrap: wrap; justify-content: center;">
-                <button type="button" name="button" onclick="dumpit();" title="Export Markdown to show all of your friends on discord and reddit :)">Markdown</button>
-            </div>
-
+  <div id="content">
+    <h3 id="statlinesButton" style="width: 100%;">⚔️ Statlines ⚔️</h3>
+    <div class="mods">
+      <div id="attackerHeader">
+        <h2 id="attackerName" title="Abilities will show here if they are detected.">&gt; Attacker's Stats &lt;</h2>
+      </div>
+      <div class="model">
+        <div class="statBoxAttacker" id="attackerModels" title="The number of models in the attacking unit.">
+          <label for="attackerModelsbox">Mdls</label><br>
+          <input type="number" class="spinner" name="attackerModelsbox" id="attackerModelsbox" size=2 value=10>
         </div>
+        <div class="statBoxAttacker" id="attackerA" title="The number of attacks each model can make. [For random attacks, see 'Hit Modifiers' tab]">
+          <label for="attackerAbox">A</label><br>
+          <input type="number" class="spinner" name="attackerAbox" id="attackerAbox" size=1 value=1>
+        </div>
+        <div class="statBoxAttacker" id="attackerAS" title="The WS or BS of the attack (Attack Skill).">
+          <label for="attackerASbox">AS</label><br>
+          <input type="number" class="spinner" name="attackerASbox" id="attackerASbox" size=1 value=3>
+        </div>
+        <div class="statBoxAttacker" id="attackerS" title="The Strength of the model OR weapon used.">
+          <label for="attackerSbox">S</label><br>
+          <input type="number" class="spinner" name="attackerSbox" id="attackerSbox" size=1 value=4>
+        </div>
+        <div class="statBoxAttacker" id="attackerAP" title="The AP (no \'-\' symbol!) of the weapon used.">
+          <label for="attackerAPbox">AP</label><br>
+          <input type="number" class="spinner" name="attackerAPbox" id="attackerAPbox" size=1 value=1>
+        </div>
+      </div>
+      <div class="model">
+        <select id="weaponsBox" name="weaponsBox">
+        </select>
+      </div>
+      <!-- Defender -->
+      <div class="model">
+        <div class="statBoxDefender" id="defenderModels">
+          <label for="defenderModelsbox">Mdls</label><br>
+          <input type="number" class="spinner" name="defenderModelsbox" id="defenderModelsbox" size=2 value=10>
+        </div>
+        <div class="statBoxDefender" id="defenderT" title="The toughness of models in the defending unit.">
+          <label for="defenderTbox">T</label><br>
+          <input type="number" class="spinner" name="defenderTbox" id="defenderTbox" size=1 value=4>
+        </div>
+        <div class="statBoxDefender" id="defenderW" title="The number of Wounds each model in the defending unit has.">
+          <label for="defenderWbox">W</label><br>
+          <input type="number" class="spinner" name="defenderWbox" id="defenderWbox" size=2 value=1>
+        </div>
+        <div class="statBoxDefender" id="defenderSv" title="The Save characteristic of the models in the defending unit.">
+          <label for="defenderSvbox">Sv</label><br>
+          <input type="number" class="spinner" name="defenderSvbox" id="defenderSvbox" size=1 value=3>
+        </div>
+      </div>
+      <div id="defenderHeader">
+        <h2 id="defenderName">Defender's Stats</h2>
+      </div>
+    </div>
+    <!-- Hit Mods -->
+
+    <h3>Hit</h3>
+    <div class="mods">
+      <div class="mod" title="Add this to the die roll.">
+        <label for="HitMod">Modifier </label>
+        <input type="number" class="spinner" name="HitMod" id="HitMod" size=1 value=0>
+      </div>
+      <div class="mod" title="Roll xDy+z attacks for each model instead of the flat Attack characteristic.">
+        <input type="checkbox" class="selectMod" id="randomAttacks"> Random number of attacks:<br>
+        <input type="number" class="spinner" name="randomAttacksDice" id="randomAttacksDice" size=1 value=1> D
+        <input type="number" class="spinner" name="randomAttacksDenom" id="randomAttacksDenom" size=1 value=6> +
+        <input type="number" class="spinner" name="randomAttacksMod" id="randomAttacksMod" size=1 value=0>
+      </div>
+      <div class="mod" title="These attacks always hit. Do not roll.">
+        <input type="checkbox" class="selectMod" id="flamer"> Auto-hit without rolling
+      </div>
+      <div class="mod" title="Reroll the hit roll if it's lower than this number.">
+        <input type="checkbox" class="selectMod" id="rerollhit"> Re-roll
+        <input type="number" class="spinner" name="rerollHITagainst" id="rerollHITagainst" size=1 value=1> or less
+      </div>
+      <div class="mod" title="Attack again if you roll a 6">
+        <input type="checkbox" class="selectMod" id="explode6"> Bonus Attack on 6's
+      </div>
+      <div class="mod" title="This hit always hits on a 6">
+        <input type="checkbox" class="selectMod" id="extrahit6"> Auto-hit on 6's
+      </div>
+      <div class="mod" title="This hit automatically hits and wounds on a 6">
+        <input type="checkbox" class="selectMod" id="autowound6"> Auto-wound on 6's
+      </div>
     </div>
 
+    <!-- Wound mods -->
+
+    <h3>Wound</h3>
+    <div class="mods">
+      <div class="mod" title="Add this to the die roll.">
+        <label for="WMod">Modifier </label>
+        <input type="number" class="spinner" name="WMod" id="WMod" size=1 value=0>
+      </div>
+      <div class="mod" title="Reroll the wound roll if it\'s lower than this number.">
+        <input type="checkbox" class="selectMod" id="rerollwound"> Re-roll
+        <input type="number" class="spinner" name="rerollWDagainst" id="rerollWDagainst" size=1 value=1> or less
+      </div>
+      <div class="mod" title="Inflict a Mortal Wound on a roll of 6">
+        <input type="checkbox" class="selectMod" id="mwo6"> Mortals on 6's
+      </div>
+      <div class="mod" title="Hit with additional AP on a 6">
+        <input type="checkbox" class="selectMod" id="apo6"> Bonus AP on 6's
+        <input type="number" class="spinner" name="apo6amount" id="apo6amount" size=1 value=3>
+      </div>
+      <div class="mod" title="Ignore all wound rolls at or below this number (like Transhuman Physiology)">
+        Ignore rolls below
+        <input type="number" class="spinner" name="ignorebelowamount" id="ignorebelowamount" size=1 value=0>
+      </div>
+    </div>
+
+    <!-- Save Mods -->
+
+    <h3>Save</h3>
+    <div class="mods">
+      <div class="mod" title="Add this to the die roll.">
+        <label for="SvMod">Modifier </label>
+        <input type="number" class="spinner" name="SvMod" id="SvMod" size=1 value=0>
+      </div>
+      <div class="mod" title="Defender as an Invulnerable save.">
+        <input type="checkbox" class="selectMod" id="defenderInvChecked"> Invulnerable Save
+        <input type="number" class="spinner" name="defenderInvbox" id="defenderInvbox" size=1 value=7>
+      </div>
+      <div class="mod" title="Roll a D6 for each point of damage. If it's higher than this number remove that point of damage.">
+        <input type="checkbox" class="selectMod" id="defenderFNPChecked"> Feel No Pain
+        <input type="number" class="spinner" name="defenderFNPbox" id="defenderFNPbox" size=1 value=7>
+      </div>
+    </div>
+
+    <!-- Damage mods -->
+
+    <h3>Damage</h3>
+    <div class="mods">
+
+      <div class="mod" title="How many dice do you roll for damage? If 0, then it will always be the Max Damage below.">
+        <label for="attackerDmultibox">Dice</label>
+        <input type="number" class="spinner" name="attackerDmultibox" id="attackerDmultibox" size=1 value=0> (0 for flat damage)
+      </div>
+
+      <div class="mod" title="The flat damage (if 0 dice are used) or the maximum sides the damage dice can have.">
+        <label for="attackerDdenombox">Max Damage</label>
+        <input type="number" class="spinner" name="attackerDdenombox" id="attackerDdenombox" size=1 value=1>
+      </div>
+
+      <div class="mod" title="Add this to the damage roll">
+        <label for="attackerDmodbox">Modifier</label>
+        <input type="number" class="spinner" name="attackerDmodbox" id="attackerDmodbox" size=1 value=0>
+      </div>
+      <div class="mod" title="Reduce damage by this much, to a minimum of 1. (Serpent Shield or Disgustingly Resilient)">
+        <label for="flatDRbox">Shield Reduction</label>
+        <input type="number" class="spinner" name="flatDRbox" id="flatDRbox" size=1 value=0>
+      </div>
+      <div class="mod" title="Model can fight back if killed if they roll this number or higher on a D6.">
+        <input type="checkbox" class="selectMod" id="fightback"> Fight on death on
+        <input type="number" class="spinner" name="fightbackagainst" id="fightbackagainst" size=1 value=4>+
+      </div>
+      <div class="mod" title="When defending models die, attempt to use Reanimation Protocols.">
+        <input type="checkbox" class="selectMod" id="reanimate"> Reanimate on
+        <input type="number" class="spinner" name="reanimateagainst" id="reanimateagainst" size=1 value=5>+
+        <!-- re-rolling <input type="number" class="spinner"name="reanimatereroll" id="reanimatereroll" size=1 value=1> or lower -->
+        <!-- adding <input type="number" class="spinner"name="reanimatemod" id="reanimatemod" size=1 value=1> to roll. -->
+
+      </div>
+    </div>
+
+    <!-- Buttons -->
+    <h3 style="width: 100%;">Setup</h3>
+
+    <div class="mods" style="display: flex; flex-wrap: wrap; justify-content: center;">
+      <button type="button" name="button" onclick="setit(1);" title="Simulate 1 time.">One Fight</button>
+      <button type="button" name="button" onclick="setit(100);;" title="Simulate 100 times.">100 Fights</button>
+      <button type="button" name="button" onclick="setit(10000);" title="Simulate 10000 times.">10,000 Fights</button>
+    </div>
+    <h3 style="width: 100%;" id="simulateButton">Tap to Simulate</h3>
+    <div id="output">
+      <p>
+        <span class='outputCataB' title='This simulator'>40kroller</span> is a tiny, lightweight attack simulator for Warhammer40k.
+      </p>
+      <b>How to use:</b>
+      <ul id="motdList">
+        <li><span style="font-size: 1.3em;"><span class="outputCataG" title="By this I mean click everything on the page!">Touch</span> the <span class="outputCataB"
+              title="Black boxes containing text are buttons, but input boxes and colored text work, too.">everything</span>!</span></li>
+        <li>If something <span class="outputCataR" title="Feel free to leave issues on the github page!">breaks</span>, don"t panic! Just <span class="outputCataB" title="Have you tried turning it off and back on again?">refresh</span>
+          the page.</li>
+        <li><span class="outputCataG" title="Put your mouse cursor over it and do not move.">Hover-over</span> or <span class="outputCataG" title="Poke with your finger and wait, if you're on mobile.">Tap-and-wait</span> on things, and a
+          <span class="outputCataB" title="If you're reading this, you're doing it correctly!">tooltip</span> will arrive in 2 seconds. It will tell you secrets!.
+        </li>
+        <li><span class="outputCataG" title="PC Master Race!">Click</span> or <span class="outputCataG" title="... but this page was designed specifically for mobile use.">tap</span> in a blank space to make tooltips go away.</li>
+        <li><span class="outputCataG" title="Hold down your finger or mouse button and drag up or down">Click/Tap and Drag</span> number box up and down to change its value.</li>
+      </ul>
+      <p><a href="https://github.com/SuperMechaCow/supermechacow.github.io">You can get this code for free on github</a></p>
+      <p>Feel free to host, contribute, and share!</p>
+    </div>
+    <h3 id="importButton" title="Paste a unit into 40kroller from Battlescribe">Import</h3>
+    <div class="">
+      <textarea name="importBox" id="importBox" class="importer" rows="8" cols="38"
+        placeholder="In Battlescribe -> Share or Copy To Clipboard -> Custom Text -> Change the Format to 'Markdown' and enable all options. Paste the copied data into this box and Click/Tap 'Import' above.">
+          **+++ Power Pidgeons (Warhammer 40,000 9th Edition) [96 PL, 11CP, 2,005pts] +++**
+
+          &nbsp;
+
+          **++ Battalion Detachment 0CP (Imperium - Adeptus Astartes - Raven Guard) [96 PL, 11CP, 2,005pts] ++**
+
+          **Rules:** *Angels of Death, Bolter Discipline, Shock Assault*
+
+          &nbsp;
+
+          **+ Configuration [12CP] +**
+
+          &nbsp;
+
+          ****Chapter Selection**:** Raven Guard
+
+          . **Categories:** *Configuration*
+
+          . **Rules:** *Shadow Masters*
+
+          &nbsp;
+
+          **Battle Size [12CP]:** 3. Strike Force (101-200 Total PL / 1001-2000 Points)  [12CP]
+
+          . **Categories:** *Configuration*
+
+          &nbsp;
+
+          **Detachment Command Cost**
+
+          . **Categories:** *Configuration*
+
+          &nbsp;
+
+          **+ HQ [22 PL, -1CP, 460pts] +**
+
+          &nbsp;
+
+          **Captain [6 PL, 130pts]:** Artificer Armour, Bolt pistol, Frag & Krak grenades, Jump Pack [1 PL, 25pts], Relic blade [10pts], Storm shield [10pts], Swift and Deadly, Warlord
+
+          . **Categories:** *Faction: Adeptus Astartes, Character, Faction: Imperium, Infantry, Captain, HQ, Fly, Jump Pack, Warlord*
+
+          . **Rules:** *Angels of Death*
+
+          . **Abilities:** *Artificer Armour, Death From Above, Iron Halo, Rites of Battle, Storm shield, Swift and Deadly (Aura)*, **Unit:** *Captain (Jump Pack)*, **Weapon:** *Bolt pistol, Frag grenades, Krak grenades, Relic blade*
+
+          **Profiles:**
+
+          . **Artificer Armour:** Description:A model with this Relic has a Save characteristic of 2+ and a 5+ invulnerable save.
+
+          . **Death From Above:** Description:During deployment, if every model in this unit has this ability, then you can set up this unit high in the skies instead of setting it up on the battlefield. If you do, then in the Reinforcements step of one of your Movement phases you can set up this unit anywhere on the battlefield that is more than 9" away from enemy models.
+
+          . **Iron Halo:** Description:This model has a 4+ invulnerable save.
+
+          . **Rites of Battle:** Description:While a friendly <CHAPTER> CORE unit is within 6" of this model, each time a model in that unit makes an attack, re-roll a hit roll of 1
+
+          . **Storm shield:** Description:The bearer has a 4+ invulnerable save. In addition, add 1 to armour saving throws made for the bearer.
+
+          . **Swift and Deadly (Aura):** Description:While a friendly RAVEN GUARD CORE or RAVEN GUARD CHARACTER unit is within 6" of this Warlord, that unit is eligible to declare a charge within a turn in which it Advanced.
+
+          . **Captain (Jump Pack):** M:12"|WS:2+|BS:2+|S:4|T:4|W:5|A:4|Ld:9|Save:3+
+
+          . **Bolt pistol:** Range:12"|Type:Pistol 1|S:4|AP:0|D:1|Abilities:-
+
+          . **Frag grenades:** Range:6"|Type:Grenade D6|S:3|AP:0|D:1|Abilities:Blast.
+
+          . **Krak grenades:** Range:6"|Type:Grenade 1|S:6|AP:-1|D:D3|Abilities:-
+
+          . **Relic blade:** Range:Melee|Type:Melee|S:+3|AP:-3|D:2|Abilities:-
+
+          &nbsp;
+
+          **Chaplain [7 PL, -1CP, 140pts]:** 1. Litany of Faith (Aura), 6. Canticle of Hate (Aura), Chapter Command:  Master of Sanctity [1 PL, 25pts], Combi-grav [10pts], Crozius arcanum, Frag & Krak grenades, Jump Pack [1 PL, 25pts], Litany of Hate, Stratagem: Hero of the Chapter [-1CP], Wise Orator
+
+          . **Categories:** *Faction: Adeptus Astartes, Character, Faction: Imperium, Infantry, Chaplain, Priest, HQ, Fly, Jump Pack, Master of Sanctity*
+
+          . **Rules:** *Angels of Death, Combi Weapon*
+
+          . **Abilities:** *1. Litany of Faith (Aura), 6. Canticle of Hate (Aura), Death From Above, Litany of Hate, Master of Sanctity, Rosarius, Spiritual Leaders, Wise Orator*, **Unit:** *Chaplain (Jump Pack)*, **Weapon:** *Boltgun, Crozius arcanum, Frag grenades, Grav-gun, Krak grenades*
+
+          **Profiles:**
+
+          . **1. Litany of Faith (Aura):** Description:If this litany is inspiring, then while a friendly CORE or CHARACTER unit is within 6" of this PRIEST, each time a model that unit would lose a wound as the result of a mortal wound, roll one D6: on a 5+, that wound is not lost.
+
+          . **6. Canticle of Hate (Aura):** Description:If this litany is inspiring, then while a friendly CORE or CHARACTER unit within 6" of this PRIEST:
+          - Add 2 to charge rolls made for that unit. This is not cumulative with any other rule that adds to a unit's charge roll.
+          - Each time a model in that unit makes a pile-in or consolidation move, it can move up to an additional 3". This is not cumulative with any other rule that increases the distance models can pile in or consolidate.
+
+          . **Death From Above:** Description:During deployment, if every model in this unit has this ability, then you can set up this unit high in the skies instead of setting it up on the battlefield. If you do, then in the Reinforcements step of one of your Movement phases you can set up this unit anywhere on the battlefield that is more than 9" away from enemy models.
+
+          . **Litany of Hate:** Description:If this litany is inspiring, then while a friendly Core or Character unit is within 6" of this Priest, each time a model in that unit makes a melee attack, you can re-roll the hit roll
+
+          . **Master of Sanctity:** Description:This model knows one additional Litany from Litanies of Battle . In your Command phase, if this model is on the battlefield, it can recite on additional litany it knows that has not already been recited by a friendly model that turn.
+
+          . **Rosarius:** Description:This model has a 4+ invulnerable save.
+
+          . **Spiritual Leaders:** Description:While a friendly <CHAPTER> CORE unit is within 6" of this model, models in that unit can use this model's Leadership characteristic instead of their own
+
+          . **Wise Orator:** Description:Each time this WARLORD recites a Litany, add 1 to the roll to see if it is inspiring.
+          Each time this WARLORD is selected to use the Commanding Oratory stratagem, that stratagem costs 1 command point.
+
+          . **Chaplain (Jump Pack):** M:12"|WS:2+|BS:3+|S:4|T:4|W:4|A:3|Ld:9|Save:3+
+
+          . **Boltgun:** Range:24"|Type:Rapid Fire 1|S:4|AP:0|D:1|Abilities:-
+
+          . **Crozius arcanum:** Range:Melee|Type:Melee|S:+2|AP:-1|D:2|Abilities:-
+
+          . **Frag grenades:** Range:6"|Type:Grenade D6|S:3|AP:0|D:1|Abilities:Blast.
+
+          . **Grav-gun:** Range:18"|Type:Rapid Fire 1|S:5|AP:-3|D:1|Abilities:Each time an attack made with this weapon is allocated to a model with a Save characteristic of 3+ or better, that attack has a Damage characteristic of 2.
+
+          . **Krak grenades:** Range:6"|Type:Grenade 1|S:6|AP:-1|D:D3|Abilities:-
+
+          &nbsp;
+
+          **Lieutenants [9 PL, 190pts]**
+
+          . **Categories:** *HQ*
+
+
+          . **Lieutenant [5 PL, 110pts]:** Bolt pistol, Combi-grav [5pts], Frag & Krak grenades, Jump Pack [1 PL, 25pts], Power fist [10pts]
+
+          . . **Categories:** *Character, Faction: Imperium, Faction: Adeptus Astartes, Infantry, Lieutenant, Fly, Jump Pack*
+
+          . . **Rules:** *Angels of Death, Combi Weapon*
+
+          . . **Abilities:** *Company Heroes, Death From Above, Tactical Precision*, **Unit:** *Lieutenant (Jump Pack)*, **Weapon:** *Bolt pistol, Boltgun, Frag grenades, Grav-gun, Krak grenades, Power fist*
+
+          . **Lieutenant in Phobos Armour [4 PL, 80pts]:** Bolt pistol, Frag & Krak grenades, Master-crafted occulus bolt carbine, Paired Combat Blades
+
+          . . **Categories:** *Faction: Imperium, Faction: Adeptus Astartes, Character, Infantry, Phobos, Primaris, Lieutenant*
+
+          . . **Rules:** *Angels of Death*
+
+          . . **Abilities:** *Company Heroes, Death From Above, Tactical Precision*, **Unit:** *Lieutenant in Phobos Armour*, **Weapon:** *Bolt pistol, Frag grenades, Krak grenades, Master-crafted occulus bolt rifle, Paired Combat Blades*
+
+          **Profiles:**
+
+          . **Company Heroes:** Description:If your army is Battle-forged, then for each LIEUTENANT unit included in a Detachment, a second LIEUTENANT unit can be included in that Detachment without taking up an additional Battlefield Role slot.
+
+          . **Death From Above:** Description:During deployment, if every model in this unit has this ability, then you can set up this unit high in the skies instead of setting it up on the battlefield. If you do, then in the Reinforcements step of one of your Movement phases you can set up this unit anywhere on the battlefield that is more than 9" away from enemy models.
+
+          . **Tactical Precision:** Description:While a friendly <CHAPTER> CORE unit is within 6" of this model, each time a model in that unit makes an attack, re-roll a wound roll of 1
+
+          . **Lieutenant (Jump Pack):** M:12"|WS:2+|BS:2+|S:4|T:4|W:4|A:3|Ld:8|Save:3+
+
+          . **Lieutenant in Phobos Armour:** M:6"|WS:2+|BS:2+|S:4|T:4|W:5|A:4|Ld:8|Save:3+
+
+          . **Bolt pistol:** Range:12"|Type:Pistol 1|S:4|AP:0|D:1|Abilities:-
+
+          . **Boltgun:** Range:24"|Type:Rapid Fire 1|S:4|AP:0|D:1|Abilities:-
+
+          . **Frag grenades:** Range:6"|Type:Grenade D6|S:3|AP:0|D:1|Abilities:Blast.
+
+          . **Grav-gun:** Range:18"|Type:Rapid Fire 1|S:5|AP:-3|D:1|Abilities:Each time an attack made with this weapon is allocated to a model with a Save characteristic of 3+ or better, that attack has a Damage characteristic of 2.
+
+          . **Krak grenades:** Range:6"|Type:Grenade 1|S:6|AP:-1|D:D3|Abilities:-
+
+          . **Master-crafted occulus bolt rifle:** Range:24"|Type:Rapid Fire 1|S:4|AP:0|D:2|Abilities:Units do not receive the benefit of cover to their saving throws against attacks made with this weapon.
+
+          . **Paired Combat Blades:** Range:Melee|Type:Melee|S:User|AP:-1|D:1|Abilities:-
+
+          . **Power fist:** Range:Melee|Type:Melee|S:x2|AP:-3|D:2|Abilities:Each time an attack is made with this weapon, subtract 1 from that attack’s hit roll.
+
+          &nbsp;
+
+          **+ Troops [22 PL, 480pts] +**
+
+          &nbsp;
+
+          **Incursor Squad [5 PL, 115pts]:** Haywire Mine [10pts]
+
+          . **Categories:** *Faction: Imperium, Faction: Adeptus Astartes, Infantry, Phobos, Smokescreen, Incursor Squad, Core, Primaris, Troops*
+
+          . **Rules:** *Angels of Death*
+
+          . **Abilities:** *Combat Squads, Concealed Positions, Haywire Mine, Multi-Spectrum Array*
+
+
+          . **4x Incursor [84pts]:** 4x Bolt pistol, 4x Frag & Krak grenades, 4x Occulus bolt carbine, 4x Paired combat blades
+
+          . . **Unit:** *Incursor*, **Weapon:** *Bolt pistol, Frag grenades, Krak grenades, Occulus bolt carbine, Paired combat blades*
+
+          . **Incursor Sergeant [21pts]:** Bolt pistol, Frag & Krak grenades, Occulus bolt carbine, Paired combat blades
+
+          . . **Unit:** *Incursor Sergeant*, **Weapon:** *Bolt pistol, Frag grenades, Krak grenades, Occulus bolt carbine, Paired combat blades*
+
+          **Profiles:**
+
+          . **Combat Squads:** Description:Before any models are deployed at the start of the game, this unit when containing its maximum number of models, may be split into two units each containing an equal number of models.
+
+          . **Concealed Positions:** Description:During Deployment when you set up this unit, if every model in this unit has this ability then it can be set up anywhere on the battlefield that is more than 9" away from the enemy deployment zone  and any enemy models
+
+          . **Haywire Mine:** Description:Once per batle, when an enemy unit finishes a charge move within Engagement Range of the bearer's unit, the bearer can use its Haywire mine. If it does, roll one D6, on a 2+, that enemy unit suffers D3 mortal wounds. (If it has the VEHICLE keyword, if suffers 3 mortal wounds instead)
+
+          . **Multi-Spectrum Array:** Description:Each time a model in this unit makes a ranged attack, you can ignore any or all hit roll and Ballistic Skill modifiers
+
+          . **Incursor:** M:6"|WS:3+|BS:3+|S:4|T:4|W:2|A:2|Ld:7|Save:3+
+
+          . **Incursor Sergeant:** M:6"|WS:3+|BS:3+|S:4|T:4|W:2|A:3|Ld:8|Save:3+
+
+          . **Bolt pistol:** Range:12"|Type:Pistol 1|S:4|AP:0|D:1|Abilities:-
+
+          . **Frag grenades:** Range:6"|Type:Grenade D6|S:3|AP:0|D:1|Abilities:Blast.
+
+          . **Krak grenades:** Range:6"|Type:Grenade 1|S:6|AP:-1|D:D3|Abilities:-
+
+          . **Occulus bolt carbine:** Range:24"|Type:Rapid Fire 1|S:4|AP:0|D:1|Abilities:Each time an attack is made with this weapon, the target does not receive the benefits of cover against that attack
+
+          . **Paired combat blades:** Range:Melee|Type:Melee|S:User|AP:-1|D:1|Abilities:-
+
+          &nbsp;
+
+          **Incursor Squad [5 PL, 115pts]:** Haywire Mine [10pts]
+
+          . **Categories:** *Faction: Imperium, Faction: Adeptus Astartes, Infantry, Phobos, Smokescreen, Incursor Squad, Core, Primaris, Troops*
+
+          . **Rules:** *Angels of Death*
+
+          . **Abilities:** *Combat Squads, Concealed Positions, Haywire Mine, Multi-Spectrum Array*
+
+
+          . **4x Incursor [84pts]:** 4x Bolt pistol, 4x Frag & Krak grenades, 4x Occulus bolt carbine, 4x Paired combat blades
+
+          . . **Unit:** *Incursor*, **Weapon:** *Bolt pistol, Frag grenades, Krak grenades, Occulus bolt carbine, Paired combat blades*
+
+          . **Incursor Sergeant [21pts]:** Bolt pistol, Frag & Krak grenades, Occulus bolt carbine, Paired combat blades
+
+          . . **Unit:** *Incursor Sergeant*, **Weapon:** *Bolt pistol, Frag grenades, Krak grenades, Occulus bolt carbine, Paired combat blades*
+
+          **Profiles:**
+
+          . **Combat Squads:** Description:Before any models are deployed at the start of the game, this unit when containing its maximum number of models, may be split into two units each containing an equal number of models.
+
+          . **Concealed Positions:** Description:During Deployment when you set up this unit, if every model in this unit has this ability then it can be set up anywhere on the battlefield that is more than 9" away from the enemy deployment zone  and any enemy models
+
+          . **Haywire Mine:** Description:Once per batle, when an enemy unit finishes a charge move within Engagement Range of the bearer's unit, the bearer can use its Haywire mine. If it does, roll one D6, on a 2+, that enemy unit suffers D3 mortal wounds. (If it has the VEHICLE keyword, if suffers 3 mortal wounds instead)
+
+          . **Multi-Spectrum Array:** Description:Each time a model in this unit makes a ranged attack, you can ignore any or all hit roll and Ballistic Skill modifiers
+
+          . **Incursor:** M:6"|WS:3+|BS:3+|S:4|T:4|W:2|A:2|Ld:7|Save:3+
+
+          . **Incursor Sergeant:** M:6"|WS:3+|BS:3+|S:4|T:4|W:2|A:3|Ld:8|Save:3+
+
+          . **Bolt pistol:** Range:12"|Type:Pistol 1|S:4|AP:0|D:1|Abilities:-
+
+          . **Frag grenades:** Range:6"|Type:Grenade D6|S:3|AP:0|D:1|Abilities:Blast.
+
+          . **Krak grenades:** Range:6"|Type:Grenade 1|S:6|AP:-1|D:D3|Abilities:-
+
+          . **Occulus bolt carbine:** Range:24"|Type:Rapid Fire 1|S:4|AP:0|D:1|Abilities:Each time an attack is made with this weapon, the target does not receive the benefits of cover against that attack
+
+          . **Paired combat blades:** Range:Melee|Type:Melee|S:User|AP:-1|D:1|Abilities:-
+
+          &nbsp;
+
+          **Infiltrator Squad [6 PL, 125pts]:** Infiltrator comms array [5pts]
+
+          . **Categories:** *Smokescreen, Faction: Adeptus Astartes, Primaris, Infantry, Infiltrator Squad, Phobos, Faction: Imperium, Core, Troops*
+
+          . **Rules:** *Angels of Death*
+
+          . **Abilities:** *Combat Squads, Concealed Positions, Infiltrator comms array, Omni-scramblers*
+
+
+          . **4x Infiltrator [96pts]:** 4x Bolt pistol, 4x Frag & Krak grenades, 4x Marksman bolt carbine
+
+          . . **Unit:** *Infiltrator*, **Weapon:** *Bolt pistol, Frag grenades, Krak grenades, Marksman bolt carbine*
+
+          . **Infiltrator Sergeant [24pts]:** Bolt pistol, Frag & Krak grenades, Marksman bolt carbine
+
+          . . **Unit:** *Infiltrator Sergeant*, **Weapon:** *Bolt pistol, Frag grenades, Krak grenades, Marksman bolt carbine*
+
+          **Profiles:**
+
+          . **Combat Squads:** Description:Before any models are deployed at the start of the game, this unit when containing its maximum number of models, may be split into two units each containing an equal number of models.
+
+          . **Concealed Positions:** Description:During Deployment when you set up this unit, if every model in this unit has this ability then it can be set up anywhere on the battlefield that is more than 9" away from the enemy deployment zone  and any enemy models
+
+          . **Infiltrator comms array:** Description:The bearer's unit is always considered to be within range of the following aura abilities of any friendly <CHAPTER> PHOBOS units that are on the battelfield; Rites of Battle, Tactical Precision.
+
+          . **Omni-scramblers:** Description:Enemy units that are set up on the battlefield as reinforcements cannot be set up within 12" of this unit.
+
+          . **Infiltrator:** M:6"|WS:3+|BS:3+|S:4|T:4|W:2|A:2|Ld:7|Save:3+
+
+          . **Infiltrator Sergeant:** M:6"|WS:3+|BS:3+|S:4|T:4|W:2|A:3|Ld:8|Save:3+
+
+          . **Bolt pistol:** Range:12"|Type:Pistol 1|S:4|AP:0|D:1|Abilities:-
+
+          . **Frag grenades:** Range:6"|Type:Grenade D6|S:3|AP:0|D:1|Abilities:Blast.
+
+          . **Krak grenades:** Range:6"|Type:Grenade 1|S:6|AP:-1|D:D3|Abilities:-
+
+          . **Marksman bolt carbine:** Range:24"|Type:Rapid Fire 1|S:4|AP:0|D:1|Abilities:Each unmodified hit roll of 6 made for this weapon's attacks automatically hits and results in a wound (do not make a wound roll for that attack).
+
+          &nbsp;
+
+          **Infiltrator Squad [6 PL, 125pts]:** Infiltrator comms array [5pts]
+
+          . **Categories:** *Smokescreen, Faction: Adeptus Astartes, Primaris, Infantry, Infiltrator Squad, Phobos, Faction: Imperium, Core, Troops*
+
+          . **Rules:** *Angels of Death*
+
+          . **Abilities:** *Combat Squads, Concealed Positions, Infiltrator comms array, Omni-scramblers*
+
+
+          . **4x Infiltrator [96pts]:** 4x Bolt pistol, 4x Frag & Krak grenades, 4x Marksman bolt carbine
+
+          . . **Unit:** *Infiltrator*, **Weapon:** *Bolt pistol, Frag grenades, Krak grenades, Marksman bolt carbine*
+
+          . **Infiltrator Sergeant [24pts]:** Bolt pistol, Frag & Krak grenades, Marksman bolt carbine
+
+          . . **Unit:** *Infiltrator Sergeant*, **Weapon:** *Bolt pistol, Frag grenades, Krak grenades, Marksman bolt carbine*
+
+          **Profiles:**
+
+          . **Combat Squads:** Description:Before any models are deployed at the start of the game, this unit when containing its maximum number of models, may be split into two units each containing an equal number of models.
+
+          . **Concealed Positions:** Description:During Deployment when you set up this unit, if every model in this unit has this ability then it can be set up anywhere on the battlefield that is more than 9" away from the enemy deployment zone  and any enemy models
+
+          . **Infiltrator comms array:** Description:The bearer's unit is always considered to be within range of the following aura abilities of any friendly <CHAPTER> PHOBOS units that are on the battelfield; Rites of Battle, Tactical Precision.
+
+          . **Omni-scramblers:** Description:Enemy units that are set up on the battlefield as reinforcements cannot be set up within 12" of this unit.
+
+          . **Infiltrator:** M:6"|WS:3+|BS:3+|S:4|T:4|W:2|A:2|Ld:7|Save:3+
+
+          . **Infiltrator Sergeant:** M:6"|WS:3+|BS:3+|S:4|T:4|W:2|A:3|Ld:8|Save:3+
+
+          . **Bolt pistol:** Range:12"|Type:Pistol 1|S:4|AP:0|D:1|Abilities:-
+
+          . **Frag grenades:** Range:6"|Type:Grenade D6|S:3|AP:0|D:1|Abilities:Blast.
+
+          . **Krak grenades:** Range:6"|Type:Grenade 1|S:6|AP:-1|D:D3|Abilities:-
+
+          . **Marksman bolt carbine:** Range:24"|Type:Rapid Fire 1|S:4|AP:0|D:1|Abilities:Each unmodified hit roll of 6 made for this weapon's attacks automatically hits and results in a wound (do not make a wound roll for that attack).
+
+          &nbsp;
+
+          **+ Elites [10 PL, 200pts] +**
+
+          &nbsp;
+
+          **Reiver Squad [5 PL, 100pts]:** Combat knife, Reiver grav chute [10pts]
+
+          . **Categories:** *Faction: Adeptus Astartes, Faction: Imperium, Infantry, Primaris, Reiver Squad, Phobos, Elites*
+
+          . **Rules:** *Angels of Death*
+
+          . **Abilities:** *Combat Squads, Death From Above, Terror Troops (Aura)*, **Weapon:** *Combat knife*
+
+
+          . **4x Reiver [72pts]:** 4x Frag & Krak grenades, 4x Special issue bolt pistol
+
+          . . **Unit:** *Reiver*, **Weapon:** *Frag grenades, Krak grenades, Special issue bolt pistol*
+
+          . **Reiver Sergeant [18pts]:** Combat knife, Frag & Krak grenades, Special issue bolt pistol
+
+          . . **Unit:** *Reiver Sergeant*, **Weapon:** *Combat knife, Frag grenades, Krak grenades, Special issue bolt pistol*
+
+          **Profiles:**
+
+          . **Combat Squads:** Description:Before any models are deployed at the start of the game, this unit when containing its maximum number of models, may be split into two units each containing an equal number of models.
+
+          . **Death From Above:** Description:During deployment, if every model in this unit has this ability, then you can set up this unit high in the skies instead of setting it up on the battlefield. If you do, then in the Reinforcements step of one of your Movement phases you can set up this unit anywhere on the battlefield that is more than 9" away from enemy models.
+
+          . **Terror Troops (Aura):** Description:While an enemy unit is within 3" of this unit, subtract 2 from the Leadership characteristic of models in that unit.
+
+          . **Reiver:** M:6"|WS:3+|BS:3+|S:4|T:4|W:2|A:2|Ld:7|Save:3+
+
+          . **Reiver Sergeant:** M:6"|WS:3+|BS:3+|S:4|T:4|W:2|A:3|Ld:8|Save:3+
+
+          . **Combat knife:** Range:Melee|Type:Melee|S:User|AP:0|D:1|Abilities:Each time the bearer fights, it can make 1 additional attack with this weapon.
+
+          . **Frag grenades:** Range:6"|Type:Grenade D6|S:3|AP:0|D:1|Abilities:Blast.
+
+          . **Krak grenades:** Range:6"|Type:Grenade 1|S:6|AP:-1|D:D3|Abilities:-
+
+          . **Special issue bolt pistol:** Range:12"|Type:Pistol 1|S:4|AP:-2|D:1|Abilities:-
+
+          &nbsp;
+
+          **Reiver Squad [5 PL, 100pts]:** Combat knife, Reiver grav chute [10pts]
+
+          . **Categories:** *Faction: Adeptus Astartes, Faction: Imperium, Infantry, Primaris, Reiver Squad, Phobos, Elites*
+
+          . **Rules:** *Angels of Death*
+
+          . **Abilities:** *Combat Squads, Death From Above, Terror Troops (Aura)*, **Weapon:** *Combat knife*
+
+
+          . **4x Reiver [72pts]:** 4x Frag & Krak grenades, 4x Special issue bolt pistol
+
+          . . **Unit:** *Reiver*, **Weapon:** *Frag grenades, Krak grenades, Special issue bolt pistol*
+
+          . **Reiver Sergeant [18pts]:** Combat knife, Frag & Krak grenades, Special issue bolt pistol
+
+          . . **Unit:** *Reiver Sergeant*, **Weapon:** *Combat knife, Frag grenades, Krak grenades, Special issue bolt pistol*
+
+          **Profiles:**
+
+          . **Combat Squads:** Description:Before any models are deployed at the start of the game, this unit when containing its maximum number of models, may be split into two units each containing an equal number of models.
+
+          . **Death From Above:** Description:During deployment, if every model in this unit has this ability, then you can set up this unit high in the skies instead of setting it up on the battlefield. If you do, then in the Reinforcements step of one of your Movement phases you can set up this unit anywhere on the battlefield that is more than 9" away from enemy models.
+
+          . **Terror Troops (Aura):** Description:While an enemy unit is within 3" of this unit, subtract 2 from the Leadership characteristic of models in that unit.
+
+          . **Reiver:** M:6"|WS:3+|BS:3+|S:4|T:4|W:2|A:2|Ld:7|Save:3+
+
+          . **Reiver Sergeant:** M:6"|WS:3+|BS:3+|S:4|T:4|W:2|A:3|Ld:8|Save:3+
+
+          . **Combat knife:** Range:Melee|Type:Melee|S:User|AP:0|D:1|Abilities:Each time the bearer fights, it can make 1 additional attack with this weapon.
+
+          . **Frag grenades:** Range:6"|Type:Grenade D6|S:3|AP:0|D:1|Abilities:Blast.
+
+          . **Krak grenades:** Range:6"|Type:Grenade 1|S:6|AP:-1|D:D3|Abilities:-
+
+          . **Special issue bolt pistol:** Range:12"|Type:Pistol 1|S:4|AP:-2|D:1|Abilities:-
+
+          &nbsp;
+
+          **+ Fast Attack [26 PL, 530pts] +**
+
+          &nbsp;
+
+          **Assault Squad [12 PL, 200pts]:** Jump Pack [2 PL, 20pts]
+
+          . **Categories:** *Faction: Adeptus Astartes, Assault Squad, Faction: Imperium, Infantry, Melta Bombs, Core, Fast Attack, Fly, Jump Pack*
+
+          . **Rules:** *Angels of Death*
+
+          . **Abilities:** *Combat Squads, Death From Above*, **Unit:** *Assault Marine (Jump Pack), Assault Marine Sergeant (Jump Pack)*
+
+
+          . **9x Space Marine [162pts]:** 9x Astartes Chainsword, 9x Bolt pistol, 9x Frag & Krak grenades
+
+          . . **Weapon:** *Astartes Chainsword, Bolt pistol, Frag grenades, Krak grenades*
+
+          . **Space Marine Sergeant [18pts]:** Astartes Chainsword, Frag & Krak grenades
+
+          . . **Weapon:** *Astartes Chainsword, Frag grenades, Krak grenades*
+
+          **Profiles:**
+
+          . **Combat Squads:** Description:Before any models are deployed at the start of the game, this unit when containing its maximum number of models, may be split into two units each containing an equal number of models.
+
+          . **Death From Above:** Description:During deployment, if every model in this unit has this ability, then you can set up this unit high in the skies instead of setting it up on the battlefield. If you do, then in the Reinforcements step of one of your Movement phases you can set up this unit anywhere on the battlefield that is more than 9" away from enemy models.
+
+          . **Assault Marine (Jump Pack):** M:12"|WS:3+|BS:3+|S:4|T:4|W:2|A:1|Ld:7|Save:3+
+
+          . **Assault Marine Sergeant (Jump Pack):** M:12"|WS:3+|BS:3+|S:4|T:4|W:2|A:2|Ld:8|Save:3+
+
+          . **Astartes Chainsword:** Range:Melee|Type:Melee|S:User|AP:-1|D:1|Abilities:When the bearer fights, it makes 1 additional attack with this weapon.
+
+          . **Bolt pistol:** Range:12"|Type:Pistol 1|S:4|AP:0|D:1|Abilities:-
+
+          . **Frag grenades:** Range:6"|Type:Grenade D6|S:3|AP:0|D:1|Abilities:Blast.
+
+          . **Krak grenades:** Range:6"|Type:Grenade 1|S:6|AP:-1|D:D3|Abilities:-
+
+          &nbsp;
+
+          **Inceptor Squad [14 PL, 330pts]:** 5x Inceptor [225pts], Inceptor Sergeant [45pts], Plasma Exterminator x2 [60pts]
+
+          . **Categories:** *Faction: Adeptus Astartes, Fly, Faction: Imperium, Inceptor Squad, Infantry, Jump Pack, Mk X Gravis, Primaris, Core, Fast Attack*
+
+          . **Rules:** *Angels of Death*
+
+          . **Abilities:** *Combat Squads, Death From Above*, **Unit:** *Inceptor, Inceptor Sergeant*, **Weapon:** *Plasma Exterminator, Standard, Plasma Exterminator, Supercharged*
+
+          **Profiles:**
+
+          . **Combat Squads:** Description:Before any models are deployed at the start of the game, this unit when containing its maximum number of models, may be split into two units each containing an equal number of models.
+
+          . **Death From Above:** Description:During deployment, if every model in this unit has this ability, then you can set up this unit high in the skies instead of setting it up on the battlefield. If you do, then in the Reinforcements step of one of your Movement phases you can set up this unit anywhere on the battlefield that is more than 9" away from enemy models.
+
+          . **Inceptor:** M:10"|WS:3+|BS:3+|S:4|T:5|W:3|A:2|Ld:7|Save:3+
+
+          . **Inceptor Sergeant:** M:10"|WS:3+|BS:3+|S:4|T:5|W:3|A:3|Ld:8|Save:3+
+
+          . **Plasma Exterminator, Standard:** Range:18"|Type:Assault D3|S:7|AP:-3|D:1|Abilities:Blast
+
+          . **Plasma Exterminator, Supercharged:** Range:18"|Type:Assault D3|S:8|AP:-3|D:2|Abilities:Blast. If any unmodified hit rolls of 1 are made for attacks with this weapon profile, the bearer is destroyed after shooting with this weapon.
+
+          &nbsp;
+
+          **+ Heavy Support [16 PL, 335pts] +**
+
+          &nbsp;
+
+          **Hellblaster Squad [8 PL, 165pts]:** Heavy Plasma Incinerator
+
+          . **Categories:** *Faction: Adeptus Astartes, Hellblaster Squad, Faction: Imperium, Infantry, Primaris, Core, Heavy Support*
+
+          . **Rules:** *Angels of Death*
+
+          . **Abilities:** *Combat Squads*, **Unit:** *Hellblaster, Hellblaster Sergeant*, **Weapon:** *Heavy Plasma Incinerator, Standard, Heavy Plasma Incinerator, Supercharged*
+
+
+          . **4x Hellblaster [132pts]:** 4x Bolt pistol, 4x Frag & Krak grenades
+
+          . . **Weapon:** *Bolt pistol, Frag grenades, Krak grenades*
+
+          . **Hellblaster Sergeant [33pts]:** Bolt pistol, Frag & Krak grenades
+
+          . . **Weapon:** *Bolt pistol, Frag grenades, Krak grenades*
+
+          **Profiles:**
+
+          . **Combat Squads:** Description:Before any models are deployed at the start of the game, this unit when containing its maximum number of models, may be split into two units each containing an equal number of models.
+
+          . **Hellblaster:** M:6"|WS:3+|BS:3+|S:4|T:4|W:2|A:2|Ld:7|Save:3+
+
+          . **Hellblaster Sergeant:** M:6"|WS:3+|BS:3+|S:4|T:4|W:2|A:3|Ld:8|Save:3+
+
+          . **Bolt pistol:** Range:12"|Type:Pistol 1|S:4|AP:0|D:1|Abilities:-
+
+          . **Frag grenades:** Range:6"|Type:Grenade D6|S:3|AP:0|D:1|Abilities:Blast.
+
+          . **Heavy Plasma Incinerator, Standard:** Range:36"|Type:Heavy 1|S:8|AP:-4|D:2|Abilities:-
+
+          . **Heavy Plasma Incinerator, Supercharged:** Range:36"|Type:Heavy 1|S:9|AP:-4|D:3|Abilities:If any unmodified hit rolls of 1 are made for attacks with this weapon profile, the bearer is destroyed after shooting with this weapon.
+
+          . **Krak grenades:** Range:6"|Type:Grenade 1|S:6|AP:-1|D:D3|Abilities:-
+
+          &nbsp;
+
+          **Predator Annihilator [8 PL, 170pts]:** Hunter-killer missile [5pts], Storm bolter [5pts], Twin lascannon, Two Heavy Bolters [30pts]
+
+          . **Categories:** *Faction: Adeptus Astartes, Faction: Imperium, Vehicle, Predator, Smokescreen, Predator Annihilator, Heavy Support*
+
+          . **Rules:** *Angels of Death, Explodes (6"/D3)*
+
+          . **Unit:** *Predator Annihilator*, **Weapon:** *Heavy bolter, Hunter-killer missile, Storm bolter, Twin lascannon*, **Wound Track:** *Predator Annihilator 1, Predator Annihilator 2, Predator Annihilator 3*
+
+          **Profiles:**
+
+          . **Predator Annihilator:** M:*|WS:6+|BS:*|S:6|T:7|W:11|A:*|Ld:8|Save:3+
+
+          . **Heavy bolter:** Range:36"|Type:Heavy 3|S:5|AP:-1|D:2|Abilities:-
+
+          . **Hunter-killer missile:** Range:48"|Type:Heavy 1|S:10|AP:-2|D:D6|Abilities:The bearer can only shoot with each hunter-killer missile it is equipped with once per battle.
+
+          . **Storm bolter:** Range:24"|Type:Rapid Fire 2|S:4|AP:0|D:1|Abilities:-
+
+          . **Twin lascannon:** Range:48"|Type:Heavy 2|S:9|AP:-3|D:D6|Abilities:-
+
+          . **Predator Annihilator 1:** Remaining W:6-11+|Characteristic 1:12"|Characteristic 2:3+|Characteristic 3:3
+
+          . **Predator Annihilator 2:** Remaining W:3-5|Characteristic 1:6"|Characteristic 2:4+|Characteristic 3:D3
+
+          . **Predator Annihilator 3:** Remaining W:1-2|Characteristic 1:3"|Characteristic 2:5+|Characteristic 3:1
+
+          &nbsp;
+
+          **++ Roster Rules ++**
+
+
+          . **Angels of Death:** This unit has the following abilities: And They Shall Know No Fear, Bolter Discipline, Shock Assault and Combat Doctrines.
+
+          . **Bolter Discipline:** Instead of following the normal rules for Rapid Fire weapons, models in this unit shooting Rapid Fire bolt weapons make double the number of attacks if any of the following apply
+
+          - The shooting model's target is within half the weapon's range
+          - The shooting model is Infantry (excluding Centurion models) and it's unit Remained Stationary in your previous Movement Phase.
+          - The shooting model is a Terminator or Biker
+
+          For the purposes of this ability, a Rapid Fire bolt weapon is any bolt weapon (see page 195) with the Rapid Fire type.
+
+          . **Shock Assault:** Each time this unit fights if it made a charge move, was charged or performed a Heroic Intervention this turn, then until that fight is resolved, add 1 to the Attacks characteristic of models in this unit.
+
+          &nbsp;
+
+          **++ Selection Rules ++**
+
+
+          . **Angels of Death:** This unit has the following abilities: And They Shall Know No Fear, Bolter Discipline, Shock Assault and Combat Doctrines.
+
+          . **Combi Weapon:** When attacking with this weapon, choose one or both of the profiles. If you choose both, subtract 1 from all hit rolls for this weapon.
+
+          . **Explodes (6"/D3):** When this model is destroyed, roll one D6 before removing it from play. On a 6 it explodes and each unit within 6" suffers D3 mortal wounds.
+
+          . **Shadow Masters:** When resolving an attack made with a ranged weapon against a unit with this tactic by a model that is more than 12" away, that unit is treated as having the benefit of cover to its saving throw, and if that unit is not a VEHICLEand is entirely on or within a terrain feature, subtract 1 from the hit roll.
+
+          &nbsp;
+
+          Created with [BattleScribe](https://www.battlescribe.net)
+</textarea>
+    </div>
+    <h3>Export</h3>
+    <div class="mods" style="display: flex; flex-wrap: wrap; justify-content: center;">
+      <button type="button" name="button" onclick="dumpit();" title="Export Markdown to show all of your friends on discord and reddit :)">Markdown</button>
+    </div>
+
+  </div>
+
+  <script type="text/javascript">
+
+  </script>
 </body>
 
 </html>
