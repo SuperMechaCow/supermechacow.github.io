@@ -352,9 +352,10 @@ function parseImport(importText, army) {
                       if (typeSplit[0] == "Rapid") {
                         weapon.type = typeSplit[0] + ' ' + typeSplit[1];
                         weapon.A = typeSplit[2];
+                      } else {
+                        weapon.type = typeSplit[0];
+                        weapon.A = typeSplit[1];
                       }
-                      weapon.type = typeSplit[0];
-                      weapon.A = typeSplit[1];
                     }
                   } else if (stat[0] == "S" || stat[0] == "D") {
                     weapon[stat[0]] = stat[1];
